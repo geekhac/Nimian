@@ -255,64 +255,6 @@ export default async function ProductsPage({
               totalPages={totalPages}
               searchParams={params as Record<string, string | string[]>}
             />
-
-            {/* 简化分页 - 使用简单链接 */}
-            {totalPages > 1 && (
-              <div className="mt-8 flex justify-center">
-                <div className="flex items-center gap-2">
-                  {currentPage > 1 && (
-                    <a
-                      href={`?page=${currentPage - 1}${searchValue ? `&search=${encodeURIComponent(searchValue)}` : ""}${brandValue ? `&brand_id=${brandValue}` : ""}`}
-                      className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
-                    >
-                      上一页
-                    </a>
-                  )}
-
-                  <div className="flex items-center gap-1">
-                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                      let pageNum;
-                      if (totalPages <= 5) {
-                        pageNum = i + 1;
-                      } else if (currentPage <= 3) {
-                        pageNum = i + 1;
-                      } else if (currentPage >= totalPages - 2) {
-                        pageNum = totalPages - 4 + i;
-                      } else {
-                        pageNum = currentPage - 2 + i;
-                      }
-
-                      return (
-                        <a
-                          key={pageNum}
-                          href={`?page=${pageNum}${searchValue ? `&search=${encodeURIComponent(searchValue)}` : ""}${brandValue ? `&brand_id=${brandValue}` : ""}`}
-                          className={`px-3 py-1 text-sm rounded ${
-                            currentPage === pageNum
-                              ? "bg-blue-600 text-white"
-                              : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
-                          }`}
-                        >
-                          {pageNum}
-                        </a>
-                      );
-                    })}
-
-                    {totalPages > 5 && currentPage < totalPages - 2 && (
-                      <span className="px-2 text-gray-400">...</span>
-                    )}
-                  </div>
-
-                  {currentPage < totalPages && (
-                    <a
-                      href={`?page=${currentPage + 1}${searchValue ? `&search=${encodeURIComponent(searchValue)}` : ""}${brandValue ? `&brand_id=${brandValue}` : ""}`}
-                      className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
-                    >
-                      下一页
-                    </a>
-                  )}
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>
