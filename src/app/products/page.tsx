@@ -1,5 +1,5 @@
 // src/app/products/page.tsx
-import { createClient } from "@/lib/supabase/server-client";
+import { createSupabaseServerClient } from "@/lib/supabase/server-client";
 import ProductList from "@/components/products/ProductList";
 import ProductFilters from "@/components/products/ProductFilters";
 import SearchBar from "@/components/products/SearchBar";
@@ -8,7 +8,7 @@ import { Suspense } from "react";
 
 // 获取商品数据（带筛选功能）
 async function getProducts(searchParams: Promise<SearchParams> | SearchParams) {
-  const supabase = await createClient();
+  const supabase = await createSupabaseServerClient();
 
   // ✅ 先解析 searchParams
   const params = await searchParams;
@@ -79,7 +79,7 @@ async function getProducts(searchParams: Promise<SearchParams> | SearchParams) {
 
 // 获取所有品牌（用于筛选下拉框）
 async function getBrands() {
-  const supabase = await createClient();
+  const supabase = await createSupabaseServerClient();
   const { data } = await supabase
     .from("brands")
     .select("id, brand_name")
@@ -92,7 +92,7 @@ async function getBrands() {
 async function getProductsCount(
   searchParams: Promise<SearchParams> | SearchParams,
 ) {
-  const supabase = await createClient();
+  const supabase = await createSupabaseServerClient();
   const params = await searchParams;
 
   let query = supabase

@@ -1,5 +1,5 @@
 // src/app/brands/page.tsx
-import { createClient } from "@/lib/supabase/server-client";
+import { createSupabaseServerClient } from "@/lib/supabase/server-client";
 import BrandsTable from "@/components/brands/BrandsTable";
 import BrandStats from "@/components/brands/BrandStats";
 import CreateBrandButton from "@/components/brands/CreateBrandButton";
@@ -10,7 +10,7 @@ import { Suspense } from "react";
 
 // 获取品牌数据
 async function getBrands(searchParams: Promise<SearchParams> | SearchParams) {
-  const supabase = await createClient();
+  const supabase = await createSupabaseServerClient();
   const params = await searchParams;
 
   let query = supabase.from("brands").select(`
@@ -49,7 +49,7 @@ async function getBrands(searchParams: Promise<SearchParams> | SearchParams) {
 
 // 获取所有地区选项
 async function getLocations() {
-  const supabase = await createClient();
+  const supabase = await createSupabaseServerClient();
   const { data } = await supabase
     .from("brands")
     .select("registered_location")
