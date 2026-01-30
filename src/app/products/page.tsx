@@ -4,13 +4,22 @@ import ProductList from "@/components/products/ProductList";
 import ProductFilters from "@/components/products/ProductFilters";
 import SearchBar from "@/components/products/SearchBar";
 import { SearchParams } from "@/types";
-import { Suspense } from "react";
+
+// 先定义正确的类型
+type ProductWithBrand = {
+  id: string;
+  product_name: string;
+  specification: string | null;
+  description: string | null;
+  brand_id: string;
+  brands: {
+    brand_name: string;
+  };
+};
 
 // 获取商品数据（带筛选功能）
 async function getProducts(searchParams: Promise<SearchParams> | SearchParams) {
   const supabase = await createSupabaseServerClient();
-
-  // ✅ 先解析 searchParams
   const params = await searchParams;
 
   let query = supabase.from("products").select(`
@@ -24,40 +33,39 @@ async function getProducts(searchParams: Promise<SearchParams> | SearchParams) {
       )
     `);
 
-  // 按商品名称或描述搜索
   if (params?.search) {
+    const searchTerm = Array.isArray(params.search)
+      ? params.search[0]
+      : params.search;
     query = query.or(
-      `product_name.ilike.%${params.search}%,description.ilike.%${params.search}%`,
+      `product_name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`,
     );
   }
 
-  // 按品牌筛选
   if (params?.brand_id) {
-    query = query.eq("brand_id", params.brand_id);
+    const brandId = Array.isArray(params.brand_id)
+      ? params.brand_id[0]
+      : params.brand_id;
+    query = query.eq("brand_id", brandId);
   }
 
-  // 按类别筛选（如果您有category字段）
-  if (params?.category) {
-    query = query.eq("category", params.category);
-  }
-
-  // 价格范围筛选（如果您有price字段）
-  if (params?.min_price) {
-    query = query.gte("price", parseFloat(params.min_price as string));
-  }
-
-  if (params?.max_price) {
-    query = query.lte("price", parseFloat(params.max_price as string));
-  }
-
-  // 排序
-  const sortBy = params?.sort || "product_name";
+  const sortParam = params?.sort;
+  const sortBy = Array.isArray(sortParam)
+    ? sortParam[0]
+    : sortParam || "product_name";
   const sortOrder = params?.order === "desc" ? false : true;
   query = query.order(sortBy, { ascending: sortOrder });
 
-  // 分页
-  const page = Number(params?.page) || 1;
-  const pageSize = Number(params?.pageSize) || 24;
+  const pageParam = params?.page;
+  const page = Array.isArray(pageParam)
+    ? Number(pageParam[0])
+    : Number(pageParam) || 1;
+
+  const pageSizeParam = params?.pageSize;
+  const pageSize = Array.isArray(pageSizeParam)
+    ? Number(pageSizeParam[0])
+    : Number(pageSizeParam) || 24;
+
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
@@ -67,17 +75,29 @@ async function getProducts(searchParams: Promise<SearchParams> | SearchParams) {
 
   if (error) {
     console.error("获取商品数据失败:", error);
-    return [];
+    return { products: [], currentPage: page, pageSize: pageSize };
   }
 
+  // 转换数据格式，确保 brands 是单个对象而不是数组
+  const products = (data || []).map((product) => ({
+    id: product.id,
+    product_name: product.product_name,
+    specification: product.specification,
+    description: product.description,
+    brand_id: product.brand_id,
+    brands: {
+      brand_name: product.brands?.[0]?.brand_name || "未知品牌",
+    },
+  })) as ProductWithBrand[];
+
   return {
-    products: data || [],
+    products,
     currentPage: page,
     pageSize: pageSize,
   };
 }
 
-// 获取所有品牌（用于筛选下拉框）
+// 获取所有品牌
 async function getBrands() {
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase
@@ -88,7 +108,7 @@ async function getBrands() {
   return data || [];
 }
 
-// 获取商品总数（用于分页）
+// 获取商品总数
 async function getProductsCount(
   searchParams: Promise<SearchParams> | SearchParams,
 ) {
@@ -99,15 +119,20 @@ async function getProductsCount(
     .from("products")
     .select("*", { count: "exact", head: true });
 
-  // 应用相同的筛选条件
   if (params?.search) {
+    const searchTerm = Array.isArray(params.search)
+      ? params.search[0]
+      : params.search;
     query = query.or(
-      `product_name.ilike.%${params.search}%,description.ilike.%${params.search}%`,
+      `product_name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`,
     );
   }
 
   if (params?.brand_id) {
-    query = query.eq("brand_id", params.brand_id);
+    const brandId = Array.isArray(params.brand_id)
+      ? params.brand_id[0]
+      : params.brand_id;
+    query = query.eq("brand_id", brandId);
   }
 
   const { count, error } = await query;
@@ -120,14 +145,21 @@ async function getProductsCount(
   return count || 0;
 }
 
-// 主页面组件
 export default async function ProductsPage({
   searchParams,
 }: {
   searchParams: Promise<SearchParams> | SearchParams;
 }) {
-  // ✅ 先解析 searchParams
   const params = await searchParams;
+
+  // 获取搜索参数值
+  const searchValue = Array.isArray(params?.search)
+    ? params.search[0]
+    : params?.search || "";
+
+  const brandValue = Array.isArray(params?.brand_id)
+    ? params.brand_id[0]
+    : params?.brand_id || "";
 
   // 并行获取数据
   const [productsData, brands, totalCount] = await Promise.all([
@@ -149,13 +181,11 @@ export default async function ProductsPage({
               <h1 className="text-3xl font-bold text-gray-900">商品管理</h1>
               <p className="mt-2 text-gray-600">
                 共 {totalCount} 个商品
-                {params?.search && (
-                  <span>，搜索到 {products.length} 个结果</span>
-                )}
+                {searchValue && <span>，搜索到 {products.length} 个结果</span>}
               </p>
             </div>
             <div className="w-full lg:w-64">
-              <SearchBar initialValue={params?.search as string} />
+              <SearchBar initialValue={searchValue} />
             </div>
           </div>
         </div>
@@ -166,128 +196,78 @@ export default async function ProductsPage({
           {/* 左侧筛选栏 */}
           <div className="lg:w-1/4">
             <div className="sticky top-8">
-              <Suspense
-                fallback={
-                  <div className="bg-white rounded-lg shadow p-6">
-                    <div className="animate-pulse">
-                      <div className="h-6 bg-gray-200 rounded w-1/2 mb-4"></div>
-                      <div className="space-y-2">
-                        <div className="h-4 bg-gray-200 rounded"></div>
-                        <div className="h-4 bg-gray-200 rounded"></div>
-                      </div>
-                    </div>
-                  </div>
-                }
-              >
-                <ProductFilters
-                  brands={brands}
-                  currentBrand={params?.brand_id as string}
-                  searchParams={params}
-                />
-              </Suspense>
+              <ProductFilters
+                brands={brands}
+                currentBrand={brandValue}
+                searchParams={params as Record<string, string | string[]>}
+              />
             </div>
           </div>
 
           {/* 右侧内容区 */}
           <div className="lg:w-3/4">
-            {/* 排序和分页信息 */}
+            {/* 排序和分页信息 - 简化结构 */}
             <div className="bg-white rounded-lg shadow p-4 mb-6">
               <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                {/* 排序和分页信息 */}
-                <div className="bg-white rounded-lg shadow p-4 mb-6">
-                  <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                    {/* 使用更简单的文本结构 */}
-                    <div className="text-sm text-gray-600">
-                      <span>显示第 </span>
-                      <span className="font-medium">
-                        {(currentPage - 1) * pageSize + 1}
-                      </span>
-                      <span> - </span>
-                      <span className="font-medium">
-                        {Math.min(currentPage * pageSize, totalCount)}
-                      </span>
-                      <span> 个商品，共 </span>
-                      <span className="font-medium">{totalCount}</span>
-                      <span> 个</span>
-                      {params?.search && (
-                        <span>，关键词: &quot;{params.search}&quot;</span>
-                      )}
-                    </div>
-
-                    {/* 排序选项 - 确保这是客户端组件 */}
-                    <div className="flex items-center gap-2">
-                      <label
-                        htmlFor="sort-select"
-                        className="text-sm text-gray-600"
-                      >
-                        排序:
-                      </label>
-                      <select
-                        id="sort-select"
-                        defaultValue={params?.sort || "product_name"}
-                        className="text-sm border border-gray-300 rounded px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        aria-label="排序选项"
-                      >
-                        <option value="product_name">名称 (A-Z)</option>
-                        <option value="product_name_desc">名称 (Z-A)</option>
-                        <option value="created_at">最新上架</option>
-                        <option value="created_at_desc">最早上架</option>
-                      </select>
-                    </div>
-                  </div>
+                <div className="text-sm text-gray-600">
+                  显示第 {(currentPage - 1) * pageSize + 1} -{" "}
+                  {Math.min(currentPage * pageSize, totalCount)} 个商品，共{" "}
+                  {totalCount} 个{searchValue && `，关键词: "${searchValue}"`}
                 </div>
 
-                {/* 排序选项 */}
+                {/* 使用简单的链接而不是表单，避免 hydration 问题 */}
                 <div className="flex items-center gap-2">
-                  <label className="text-sm text-gray-600">排序:</label>
-                  <select
-                    defaultValue={params?.sort || "product_name"}
-                    className="text-sm border border-gray-300 rounded px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="product_name">名称 (A-Z)</option>
-                    <option value="product_name_desc">名称 (Z-A)</option>
-                    <option value="created_at">最新上架</option>
-                    <option value="created_at_desc">最早上架</option>
-                  </select>
+                  <span className="text-sm text-gray-600">排序:</span>
+                  <div className="flex gap-1">
+                    <a
+                      href="?sort=product_name"
+                      className={`px-3 py-1 text-sm rounded ${!params?.sort || params.sort === "product_name" ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+                    >
+                      名称 A-Z
+                    </a>
+                    <a
+                      href="?sort=product_name&order=desc"
+                      className={`px-3 py-1 text-sm rounded ${params?.sort === "product_name" && params?.order === "desc" ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+                    >
+                      名称 Z-A
+                    </a>
+                    <a
+                      href="?sort=created_at&order=desc"
+                      className={`px-3 py-1 text-sm rounded ${params?.sort === "created_at" && (!params?.order || params.order === "desc") ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+                    >
+                      最新
+                    </a>
+                    <a
+                      href="?sort=created_at"
+                      className={`px-3 py-1 text-sm rounded ${params?.sort === "created_at" && params?.order !== "desc" ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+                    >
+                      最早
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* 商品列表 */}
-            <Suspense
-              fallback={
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i} className="bg-white rounded-lg shadow p-6">
-                      <div className="animate-pulse">
-                        <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
-                        <div className="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
-                        <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
-                        <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              }
-            >
-              <ProductList
-                products={products}
-                currentPage={currentPage}
-                totalPages={totalPages}
-                searchParams={params}
-              />
-            </Suspense>
+            <ProductList
+              products={products}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              searchParams={params as Record<string, string | string[]>}
+            />
 
-            {/* 简单分页（如果没有Pagination组件） */}
+            {/* 简化分页 - 使用简单链接 */}
             {totalPages > 1 && (
               <div className="mt-8 flex justify-center">
                 <div className="flex items-center gap-2">
-                  <button
-                    disabled={currentPage <= 1}
-                    className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    上一页
-                  </button>
+                  {currentPage > 1 && (
+                    <a
+                      href={`?page=${currentPage - 1}${searchValue ? `&search=${encodeURIComponent(searchValue)}` : ""}${brandValue ? `&brand_id=${brandValue}` : ""}`}
+                      className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                    >
+                      上一页
+                    </a>
+                  )}
 
                   <div className="flex items-center gap-1">
                     {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
@@ -303,8 +283,9 @@ export default async function ProductsPage({
                       }
 
                       return (
-                        <button
+                        <a
                           key={pageNum}
+                          href={`?page=${pageNum}${searchValue ? `&search=${encodeURIComponent(searchValue)}` : ""}${brandValue ? `&brand_id=${brandValue}` : ""}`}
                           className={`px-3 py-1 text-sm rounded ${
                             currentPage === pageNum
                               ? "bg-blue-600 text-white"
@@ -312,21 +293,23 @@ export default async function ProductsPage({
                           }`}
                         >
                           {pageNum}
-                        </button>
+                        </a>
                       );
                     })}
 
                     {totalPages > 5 && currentPage < totalPages - 2 && (
-                      <span className="px-2">...</span>
+                      <span className="px-2 text-gray-400">...</span>
                     )}
                   </div>
 
-                  <button
-                    disabled={currentPage >= totalPages}
-                    className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    下一页
-                  </button>
+                  {currentPage < totalPages && (
+                    <a
+                      href={`?page=${currentPage + 1}${searchValue ? `&search=${encodeURIComponent(searchValue)}` : ""}${brandValue ? `&brand_id=${brandValue}` : ""}`}
+                      className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                    >
+                      下一页
+                    </a>
+                  )}
                 </div>
               </div>
             )}

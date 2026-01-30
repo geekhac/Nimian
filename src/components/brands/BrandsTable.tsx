@@ -14,6 +14,7 @@ import {
 import EditBrandModal from "./EditBrandModal";
 import DeleteBrandModal from "./DeleteBrandModal";
 import ViewBrandModal from "./ViewBrandModal";
+import { Package, Plus } from "lucide-react";
 
 interface Brand {
   id: string;

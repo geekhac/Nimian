@@ -1,24 +1,24 @@
-'use client';
+"use client";
 
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
-  searchParams: Record<string, string>;
+  searchParams: Record<string, string | string[] | undefined>;
 }
 
-export default function Pagination({ 
-  currentPage, 
-  totalPages, 
-  searchParams 
+export default function Pagination({
+  currentPage,
+  totalPages,
+  searchParams,
 }: PaginationProps) {
   const router = useRouter();
 
   const navigateToPage = (page: number) => {
     const params = new URLSearchParams(searchParams as Record<string, string>);
-    params.set('page', page.toString());
+    params.set("page", page.toString());
     router.push(`/products?${params.toString()}`);
   };
 
@@ -45,7 +45,7 @@ export default function Pagination({
       <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
         <div>
           <p className="text-sm text-gray-700">
-            Page <span className="font-medium">{currentPage}</span> of{' '}
+            Page <span className="font-medium">{currentPage}</span> of{" "}
             <span className="font-medium">{totalPages}</span>
           </p>
         </div>
@@ -59,7 +59,7 @@ export default function Pagination({
               <span className="sr-only">Previous</span>
               <ChevronLeft className="h-5 w-5" />
             </button>
-            
+
             {/* 页码按钮 */}
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
               let pageNum;
@@ -79,15 +79,15 @@ export default function Pagination({
                   onClick={() => navigateToPage(pageNum)}
                   className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ${
                     currentPage === pageNum
-                      ? 'z-10 bg-blue-600 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600'
-                      : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50'
+                      ? "z-10 bg-blue-600 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                      : "text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
                   }`}
                 >
                   {pageNum}
                 </button>
               );
             })}
-            
+
             <button
               onClick={() => navigateToPage(currentPage + 1)}
               disabled={currentPage >= totalPages}

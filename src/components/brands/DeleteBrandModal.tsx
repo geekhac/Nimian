@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { X, Loader2, AlertTriangle } from "lucide-react";
-import { createClient } from "@supabase/supabase-js";
+import { createSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 
 interface Brand {
   id: string;
@@ -39,7 +39,7 @@ export default function DeleteBrandModal({
     setError(null);
 
     try {
-      const supabase = createClient();
+      const supabase = createSupabaseBrowserClient();
 
       // 先检查是否有商品关联
       const { data: products, error: productsError } = await supabase

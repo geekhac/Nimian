@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { X, Loader2 } from "lucide-react";
-import { createClient } from "@supabase/supabase-js";
+import { createSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 
 interface CreateBrandModalProps {
   isOpen: boolean;
@@ -47,7 +47,7 @@ export default function CreateBrandModal({
     setError(null);
 
     try {
-      const supabase = createClient();
+      const supabase = createSupabaseBrowserClient();
 
       const { data, error } = await supabase
         .from("brands")

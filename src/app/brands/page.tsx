@@ -24,16 +24,25 @@ async function getBrands(searchParams: Promise<SearchParams> | SearchParams) {
 
   // 按品牌名称搜索
   if (params?.search) {
-    query = query.ilike("brand_name", `%${params.search}%`);
+    const searchTerm = Array.isArray(params.search)
+      ? params.search[0]
+      : params.search;
+    query = query.ilike("brand_name", `%${searchTerm}%`);
   }
 
   // 按地区筛选
   if (params?.location && params.location !== "all") {
-    query = query.eq("registered_location", params.location);
+    const location = Array.isArray(params.location)
+      ? params.location[0]
+      : params.location;
+    query = query.eq("registered_location", location);
   }
 
-  // 排序
-  const sortBy = params?.sort || "brand_name";
+  // 修复排序参数
+  const sortParam = params?.sort;
+  const sortBy = Array.isArray(sortParam)
+    ? sortParam[0]
+    : sortParam || "brand_name";
   const sortOrder = params?.order === "desc" ? false : true;
   query = query.order(sortBy, { ascending: sortOrder });
 
@@ -70,6 +79,15 @@ export default async function BrandsPage({
 }) {
   const params = await searchParams;
 
+  // 获取搜索参数值
+  const searchValue = Array.isArray(params?.search)
+    ? params.search[0]
+    : params?.search || "";
+
+  const locationValue = Array.isArray(params?.location)
+    ? params.location[0]
+    : params?.location || "";
+
   // 并行获取数据
   const [brands, locations] = await Promise.all([
     getBrands(searchParams),
@@ -96,7 +114,7 @@ export default async function BrandsPage({
 
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="w-full sm:w-64">
-                <SearchBar initialValue={params?.search as string} />
+                <SearchBar initialValue={searchValue} />
               </div>
               <CreateBrandButton />
             </div>
@@ -127,18 +145,20 @@ export default async function BrandsPage({
         <div className="bg-white rounded-lg shadow p-4 mb-6">
           <div className="flex flex-wrap gap-2">
             <span className="text-sm text-gray-700 font-medium">地区筛选:</span>
-            <button
-              className={`px-3 py-1 rounded-full text-sm ${!params?.location ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+            <a
+              href="?location=all"
+              className={`px-3 py-1 rounded-full text-sm ${!locationValue || locationValue === "all" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
             >
               全部
-            </button>
+            </a>
             {locations.map((location) => (
-              <button
+              <a
                 key={location}
-                className={`px-3 py-1 rounded-full text-sm ${params?.location === location ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+                href={`?location=${encodeURIComponent(location)}`}
+                className={`px-3 py-1 rounded-full text-sm ${locationValue === location ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
               >
                 {location}
-              </button>
+              </a>
             ))}
           </div>
         </div>

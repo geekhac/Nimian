@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Package, Tag, ShoppingCart, ChevronRight } from 'lucide-react';
-import Link from 'next/link';
+import { useState } from "react";
+import { Package, Tag, ShoppingCart, ChevronRight } from "lucide-react";
+import Link from "next/link";
 
 interface Product {
   id: string;
   product_name: string;
-  specification: string;
-  description: string;
+  specification: string | null;
+  description: string | null;
   brand_id: string;
   brands: {
     brand_name: string;
@@ -30,20 +30,28 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   const stockQuantity = product.inventory?.stock_quantity || 0;
   const supplierCount = product.suppliers?.count || 0;
-  
-  const stockStatus = stockQuantity > 100 ? 'In Stock' 
-    : stockQuantity > 20 ? 'Limited Stock' 
-    : stockQuantity > 0 ? 'Low Stock' 
-    : 'Out of Stock';
-    
-  const stockColor = stockQuantity > 100 ? 'text-green-600 bg-green-50' 
-    : stockQuantity > 20 ? 'text-yellow-600 bg-yellow-50' 
-    : stockQuantity > 0 ? 'text-orange-600 bg-orange-50' 
-    : 'text-red-600 bg-red-50';
+
+  const stockStatus =
+    stockQuantity > 100
+      ? "In Stock"
+      : stockQuantity > 20
+        ? "Limited Stock"
+        : stockQuantity > 0
+          ? "Low Stock"
+          : "Out of Stock";
+
+  const stockColor =
+    stockQuantity > 100
+      ? "text-green-600 bg-green-50"
+      : stockQuantity > 20
+        ? "text-yellow-600 bg-yellow-50"
+        : stockQuantity > 0
+          ? "text-orange-600 bg-orange-50"
+          : "text-red-600 bg-red-50";
 
   return (
     <Link href={`/products/${product.id}`}>
-      <div 
+      <div
         className="bg-white rounded-lg shadow hover:shadow-lg transition-all duration-200 overflow-hidden h-full border border-gray-200 hover:border-blue-300"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
@@ -56,10 +64,12 @@ export default function ProductCard({ product }: ProductCardProps) {
                 <Package className="w-5 h-5 text-blue-500" />
               </div>
               <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded">
-                {product.brands?.brand_name || 'No Brand'}
+                {product.brands?.brand_name || "No Brand"}
               </span>
             </div>
-            <span className={`text-xs font-medium px-2 py-1 rounded ${stockColor}`}>
+            <span
+              className={`text-xs font-medium px-2 py-1 rounded ${stockColor}`}
+            >
               {stockStatus}
             </span>
           </div>
@@ -97,23 +107,25 @@ export default function ProductCard({ product }: ProductCardProps) {
           {/* 底部操作区 */}
           <div className="mt-4 pt-4 border-t border-gray-100">
             <div className="flex justify-between items-center">
-              <button 
+              <button
                 className={`flex items-center gap-1 text-sm font-medium transition-all duration-200 ${
-                  isHovered ? 'text-blue-600 scale-105' : 'text-blue-500'
+                  isHovered ? "text-blue-600 scale-105" : "text-blue-500"
                 }`}
                 onClick={(e) => e.preventDefault()}
               >
                 View Details
-                <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${
-                  isHovered ? 'translate-x-1' : ''
-                }`} />
+                <ChevronRight
+                  className={`w-4 h-4 transition-transform duration-200 ${
+                    isHovered ? "translate-x-1" : ""
+                  }`}
+                />
               </button>
-              
-              <button 
+
+              <button
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                  isHovered 
-                    ? 'bg-blue-600 text-white shadow-md scale-105' 
-                    : 'bg-blue-500 text-white'
+                  isHovered
+                    ? "bg-blue-600 text-white shadow-md scale-105"
+                    : "bg-blue-500 text-white"
                 }`}
                 onClick={(e) => {
                   e.preventDefault();

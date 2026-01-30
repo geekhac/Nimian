@@ -1,9 +1,8 @@
-// components/brands/EditBrandModal.tsx
 "use client";
 
 import { useState, useEffect } from "react";
 import { X, Loader2 } from "lucide-react";
-import { createClient } from "@supabase/supabase-js";
+import { createSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 
 interface Brand {
   id: string;
@@ -65,13 +64,18 @@ export default function EditBrandModal({
     setError(null);
 
     try {
-      const supabase = createClient();
+      const supabase = createSupabaseBrowserClient();
+
+      // 修复这里：处理可能为 null 的值
+      const registeredLocation = formData.registered_location
+        ? formData.registered_location.trim()
+        : null;
 
       const { error } = await supabase
         .from("brands")
         .update({
           brand_name: formData.brand_name.trim(),
-          registered_location: formData.registered_location.trim() || null,
+          registered_location: registeredLocation,
           core_category_focus: formData.core_category_focus,
           updated_at: new Date().toISOString(),
         })
@@ -80,6 +84,7 @@ export default function EditBrandModal({
       if (error) throw error;
 
       onSuccess();
+      onClose(); // 添加成功后关闭模态框
     } catch (err: any) {
       console.error("更新品牌失败:", err);
       setError(err.message || "更新品牌失败，请重试");
@@ -97,6 +102,11 @@ export default function EditBrandModal({
     }));
   };
 
+  const handleClose = () => {
+    setError(null);
+    onClose();
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
@@ -109,7 +119,7 @@ export default function EditBrandModal({
             </p>
           </div>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="p-1 hover:bg-gray-100 rounded"
             disabled={loading}
           >
@@ -149,7 +159,7 @@ export default function EditBrandModal({
             </label>
             <input
               type="text"
-              value={formData.registered_location}
+              value={formData.registered_location || ""}
               onChange={(e) =>
                 setFormData((prev) => ({
                   ...prev,
@@ -198,7 +208,7 @@ export default function EditBrandModal({
           <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleClose}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               disabled={loading}
             >
