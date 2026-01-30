@@ -55,8 +55,31 @@ export default function ProductCard({
           ? "text-orange-600 bg-orange-50"
           : "text-red-600 bg-red-50";
 
+  const rawId = product?.id;
+  const uuidRegex =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  const isValidId = typeof rawId === "string" && uuidRegex.test(rawId);
+
+  if (!isValidId) {
+    console.error(
+      "ProductCard: invalid product id, will not link to detail page:",
+      rawId,
+      product,
+    );
+    return (
+      <div className="bg-white rounded-lg shadow overflow-hidden h-full border border-gray-200 p-6">
+        <div className="text-sm text-red-600">无效商品ID，无法跳转详情</div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 h-14">
+          {product.product_name || "未知商品"}
+        </h3>
+      </div>
+    );
+  }
+
+  const href = `/products/${rawId}`;
+
   return (
-    <Link href={`/products/${product.id}`}>
+    <Link href={href}>
       <div
         className="bg-white rounded-lg shadow hover:shadow-lg transition-all duration-200 overflow-hidden h-full border border-gray-200 hover:border-blue-300"
         onMouseEnter={() => setIsHovered(true)}

@@ -19,7 +19,7 @@ interface ProductListProps {
   }>;
   currentPage: number;
   totalPages: number;
-  searchParams: Record<string, string | string[] | undefined>; // ✅ 添加 undefined
+  searchParams: Record<string, string | string[] | undefined>;
   brands: Array<{ id: string; brand_name: string }>;
 }
 
@@ -30,10 +30,26 @@ export default function ProductList({
   searchParams,
   brands,
 }: ProductListProps) {
-  const [showCreate, setShowCreate] = useState(false);
   const [editing, setEditing] = useState<null | any>(null);
   const [deleting, setDeleting] = useState<null | any>(null);
-  if (products.length === 0) {
+
+  const uuidRegex =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  const validProducts = products.filter(
+    (p) => typeof p.id === "string" && uuidRegex.test(p.id),
+  );
+
+  if (validProducts.length !== products.length) {
+    console.warn(
+      "ProductList: some products have invalid or missing id and will be hidden",
+      {
+        total: products.length,
+        shown: validProducts.length,
+      },
+    );
+  }
+
+  if (validProducts.length === 0) {
     return (
       <div className="text-center py-12">
         <div className="text-gray-400 mb-4">
@@ -72,7 +88,7 @@ export default function ProductList({
 
       {/* 商品网格 */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {products.map((product) => (
+        {validProducts.map((product) => (
           <ProductCard
             key={product.id}
             product={product}
@@ -128,7 +144,6 @@ export default function ProductList({
                     });
                     if (!res.ok) throw new Error("删除失败");
                     setDeleting(null);
-                    // refresh page
                     location.reload();
                   } catch (err) {
                     console.error(err);
