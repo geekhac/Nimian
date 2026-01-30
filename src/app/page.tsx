@@ -12,8 +12,58 @@ import {
   Grid,
   ArrowRight,
 } from "lucide-react";
+import { createSupabaseServerClient } from "@/lib/supabase/server-client";
 
-export default function HomePage() {
+async function getStats() {
+  const supabase = await createSupabaseServerClient();
+
+  try {
+    const [
+      { count: merchants },
+      { count: brands },
+      { count: products },
+      { count: suppliers },
+      { count: supplies },
+    ] = await Promise.all([
+      supabase.from("merchants").select("id", { count: "exact" }).then((r) => ({
+        count: r.count || 0,
+      })),
+      supabase.from("brands").select("id", { count: "exact" }).then((r) => ({
+        count: r.count || 0,
+      })),
+      supabase.from("products").select("id", { count: "exact" }).then((r) => ({
+        count: r.count || 0,
+      })),
+      supabase.from("supplier_assessment").select("id", { count: "exact" }).then((r) => ({
+        count: r.count || 0,
+      })),
+      supabase.from("supply_records").select("id", { count: "exact" }).then((r) => ({
+        count: r.count || 0,
+      })),
+    ]);
+
+    return {
+      merchants,
+      brands,
+      products,
+      suppliers,
+      supplies,
+    };
+  } catch (error) {
+    console.error("获取统计数据失败:", error);
+    return {
+      merchants: 0,
+      brands: 0,
+      products: 0,
+      suppliers: 0,
+      supplies: 0,
+    };
+  }
+}
+
+export default async function HomePage() {
+  const stats = await getStats();
+
   const navigationCards = [
     {
       title: "商家管理",
@@ -21,7 +71,7 @@ export default function HomePage() {
       icon: <Store className="w-8 h-8" />,
       href: "/merchants",
       color: "bg-gradient-to-br from-blue-500 to-blue-600",
-      stats: "45家商家",
+      stats: `${stats.merchants}家商家`,
       statColor: "text-blue-500",
     },
     {
@@ -30,7 +80,7 @@ export default function HomePage() {
       icon: <Tag className="w-8 h-8" />,
       href: "/brands",
       color: "bg-gradient-to-br from-purple-500 to-purple-600",
-      stats: "32个品牌",
+      stats: `${stats.brands}个品牌`,
       statColor: "text-purple-500",
     },
     {
@@ -39,7 +89,7 @@ export default function HomePage() {
       icon: <Package className="w-8 h-8" />,
       href: "/products",
       color: "bg-gradient-to-br from-green-500 to-green-600",
-      stats: "1,248件商品",
+      stats: `${stats.products}件商品`,
       statColor: "text-green-500",
     },
     {
@@ -48,7 +98,7 @@ export default function HomePage() {
       icon: <Truck className="w-8 h-8" />,
       href: "/suppliers",
       color: "bg-gradient-to-br from-orange-500 to-orange-600",
-      stats: "18家供应商",
+      stats: `${stats.suppliers}家供应商`,
       statColor: "text-orange-500",
     },
     {
@@ -57,7 +107,7 @@ export default function HomePage() {
       icon: <Layers className="w-8 h-8" />,
       href: "/supplies",
       color: "bg-gradient-to-br from-red-500 to-red-600",
-      stats: "256条记录",
+      stats: `${stats.supplies}条记录`,
       statColor: "text-red-500",
     },
     {
@@ -95,10 +145,10 @@ export default function HomePage() {
   ];
 
   const recentActivities = [
-    { action: "新商家入驻", merchant: "鲜果时光", time: "10分钟前" },
-    { action: "商品上架", merchant: "Nike运动鞋", time: "30分钟前" },
-    { action: "供货价格更新", merchant: "苹果供应商", time: "1小时前" },
-    { action: "品牌授权更新", merchant: "Adidas", time: "2小时前" },
+    { action: "新商品上架", merchant: `共${stats.products}件`, time: "实时" },
+    { action: "商品关联品牌", merchant: `共${stats.brands}个品牌`, time: "实时" },
+    { action: "供货价格配置", merchant: `共${stats.supplies}条记录`, time: "实时" },
+    { action: "供应商数量", merchant: `共${stats.suppliers}家供应商`, time: "实时" },
   ];
 
   return (
@@ -139,15 +189,15 @@ export default function HomePage() {
           <div className="bg-white rounded-xl shadow-sm p-6 border">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">今日订单</p>
-                <p className="text-2xl font-bold mt-2">1,248</p>
+                <p className="text-sm text-gray-500">总商品数</p>
+                <p className="text-2xl font-bold mt-2">{stats.products}</p>
               </div>
               <div className="p-3 bg-blue-50 rounded-lg">
                 <ShoppingBag className="w-6 h-6 text-blue-600" />
               </div>
             </div>
             <div className="mt-4 pt-4 border-t">
-              <p className="text-sm text-green-600">↑ 12.5% 较昨日</p>
+              <p className="text-sm text-gray-600">已上架商品</p>
             </div>
           </div>
 
@@ -155,44 +205,44 @@ export default function HomePage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-500">活跃商家</p>
-                <p className="text-2xl font-bold mt-2">38</p>
+                <p className="text-2xl font-bold mt-2">{stats.merchants}</p>
               </div>
               <div className="p-3 bg-green-50 rounded-lg">
                 <Store className="w-6 h-6 text-green-600" />
               </div>
             </div>
             <div className="mt-4 pt-4 border-t">
-              <p className="text-sm text-green-600">↑ 3家 本周新增</p>
+              <p className="text-sm text-gray-600">合作商家总数</p>
             </div>
           </div>
 
           <div className="bg-white rounded-xl shadow-sm p-6 border">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">总库存量</p>
-                <p className="text-2xl font-bold mt-2">45,621</p>
+                <p className="text-sm text-gray-500">品牌数量</p>
+                <p className="text-2xl font-bold mt-2">{stats.brands}</p>
               </div>
               <div className="p-3 bg-purple-50 rounded-lg">
                 <Package className="w-6 h-6 text-purple-600" />
               </div>
             </div>
             <div className="mt-4 pt-4 border-t">
-              <p className="text-sm text-red-600">↓ 2.3% 较上周</p>
+              <p className="text-sm text-gray-600">已入驻品牌</p>
             </div>
           </div>
 
           <div className="bg-white rounded-xl shadow-sm p-6 border">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">待处理</p>
-                <p className="text-2xl font-bold mt-2">23</p>
+                <p className="text-sm text-gray-500">供应商</p>
+                <p className="text-2xl font-bold mt-2">{stats.suppliers}</p>
               </div>
               <div className="p-3 bg-orange-50 rounded-lg">
                 <Tag className="w-6 h-6 text-orange-600" />
               </div>
             </div>
             <div className="mt-4 pt-4 border-t">
-              <p className="text-sm text-gray-600">包含审核、问题单等</p>
+              <p className="text-sm text-gray-600">合作供应商</p>
             </div>
           </div>
         </div>
@@ -298,22 +348,22 @@ export default function HomePage() {
 
             {/* 系统状态 */}
             <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-sm p-6 text-white">
-              <h3 className="text-lg font-semibold mb-2">系统状态</h3>
-              <p className="text-sm opacity-90 mb-4">所有系统运行正常</p>
+              <h3 className="text-lg font-semibold mb-2">系统统计</h3>
+              <p className="text-sm opacity-90 mb-4">实时数据统计</p>
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm">API响应时间</span>
-                  <span className="text-sm font-medium">128ms</span>
+                  <span className="text-sm">商品总数</span>
+                  <span className="text-sm font-medium">{stats.products}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm">数据库连接</span>
+                  <span className="text-sm">供应记录</span>
                   <span className="text-sm font-medium text-green-300">
-                    正常
+                    {stats.supplies}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm">在线用户</span>
-                  <span className="text-sm font-medium">24</span>
+                  <span className="text-sm">供应商数</span>
+                  <span className="text-sm font-medium">{stats.suppliers}</span>
                 </div>
               </div>
             </div>
