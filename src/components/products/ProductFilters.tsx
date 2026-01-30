@@ -1,14 +1,18 @@
+"use client";
+
 import { Filter, X } from "lucide-react";
 import FilterLink from "@/components/products/FilterLink";
 
 interface ProductFiltersProps {
   brands: Array<{ id: string; brand_name: string }>;
   currentBrand?: string;
-  searchParams: Record<string, string | string[]>;
+  searchParams: Record<string, string | string[] | undefined>;
 }
 
 // 辅助函数：构建查询字符串
-function buildQueryString(params: Record<string, string | string[]>): string {
+function buildQueryString(
+  params: Record<string, string | string[] | undefined>,
+): string {
   const urlSearchParams = new URLSearchParams();
 
   Object.entries(params).forEach(([key, value]) => {
@@ -32,7 +36,7 @@ export default function ProductFilters({
   searchParams,
 }: ProductFiltersProps) {
   const activeFilters = Object.keys(searchParams).filter(
-    (key) => key !== "page" && searchParams[key],
+    (key) => key !== "page" && searchParams[key as keyof typeof searchParams],
   );
 
   return (
@@ -40,7 +44,7 @@ export default function ProductFilters({
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
           <Filter className="w-5 h-5" />
-          Filters
+          筛选
         </h2>
         {activeFilters.length > 0 && (
           <FilterLink
@@ -55,7 +59,7 @@ export default function ProductFilters({
 
       {/* 品牌筛选 */}
       <div className="mb-6">
-        <h3 className="text-sm font-medium text-gray-900 mb-3">Brand</h3>
+        <h3 className="text-sm font-medium text-gray-900 mb-3">品牌</h3>
         <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
           <FilterLink
             href="/products"
@@ -124,27 +128,7 @@ export default function ProductFilters({
         </div>
       </div>
 
-      {/* 类别筛选 */}
-      <div className="mb-6">
-        <h3 className="text-sm font-medium text-gray-900 mb-3">Category</h3>
-        <div className="space-y-2">
-          {["Skincare", "Makeup", "Haircare", "Oral Care", "Body Care"].map(
-            (category) => (
-              <FilterLink
-                key={category}
-                href={`/products?category=${category.toLowerCase()}`}
-                className={`block text-sm ${
-                  searchParams.category === category.toLowerCase()
-                    ? "text-blue-600 font-medium"
-                    : "text-gray-600 hover:text-gray-900"
-                }`}
-              >
-                {category}
-              </FilterLink>
-            ),
-          )}
-        </div>
-      </div>
+      {/* 已移除静态 Category 快捷搜索 */}
 
       {/* 活跃的筛选标签 */}
       {activeFilters.length > 0 && (

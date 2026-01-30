@@ -23,9 +23,15 @@ interface Product {
 
 interface ProductCardProps {
   product: Product;
+  onEdit?: (product: Product) => void;
+  onDelete?: (product: Product) => void;
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({
+  product,
+  onEdit,
+  onDelete,
+}: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
 
   const stockQuantity = product.inventory?.stock_quantity || 0;
@@ -121,20 +127,42 @@ export default function ProductCard({ product }: ProductCardProps) {
                 />
               </button>
 
-              <button
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                  isHovered
-                    ? "bg-blue-600 text-white shadow-md scale-105"
-                    : "bg-blue-500 text-white"
-                }`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  // 添加到购物车逻辑
-                }}
-              >
-                <ShoppingCart className="w-4 h-4" />
-                Add
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  className="px-3 py-1 text-sm rounded bg-gray-100 hover:bg-gray-200"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (typeof onEdit === "function") onEdit(product);
+                  }}
+                >
+                  编辑
+                </button>
+                <button
+                  className="px-3 py-1 text-sm rounded bg-red-50 text-red-600 hover:bg-red-100"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (typeof onDelete === "function") onDelete(product);
+                  }}
+                >
+                  删除
+                </button>
+                <button
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    isHovered
+                      ? "bg-blue-600 text-white shadow-md scale-105"
+                      : "bg-blue-500 text-white"
+                  }`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    // 添加到购物车逻辑
+                  }}
+                >
+                  <ShoppingCart className="w-4 h-4" />
+                  Add
+                </button>
+              </div>
             </div>
           </div>
         </div>

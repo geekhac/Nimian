@@ -78,17 +78,23 @@ async function getProducts(searchParams: Promise<SearchParams> | SearchParams) {
     return { products: [], currentPage: page, pageSize: pageSize };
   }
 
-  // 转换数据格式，确保 brands 是单个对象而不是数组
-  const products = (data || []).map((product) => ({
-    id: product.id,
-    product_name: product.product_name,
-    specification: product.specification,
-    description: product.description,
-    brand_id: product.brand_id,
-    brands: {
-      brand_name: product.brands?.[0]?.brand_name || "未知品牌",
-    },
-  })) as ProductWithBrand[];
+  // 转换数据格式，兼容 Supabase 返回的 brands 为数组或对象
+  const products = (data || []).map((product) => {
+    const brandName = Array.isArray(product.brands)
+      ? product.brands[0]?.brand_name
+      : product.brands?.brand_name;
+
+    return {
+      id: product.id,
+      product_name: product.product_name,
+      specification: product.specification,
+      description: product.description,
+      brand_id: product.brand_id,
+      brands: {
+        brand_name: brandName || "未知品牌",
+      },
+    };
+  }) as ProductWithBrand[];
 
   return {
     products,
@@ -219,18 +225,47 @@ export default async function ProductsPage({
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-gray-600">排序:</span>
                   <div className="flex gap-1">
-                    <a
-                      href="?sort=product_name"
-                      className={`px-3 py-1 text-sm rounded ${!params?.sort || params.sort === "product_name" ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
-                    >
-                      名称 A-Z
-                    </a>
-                    <a
-                      href="?sort=product_name&order=desc"
-                      className={`px-3 py-1 text-sm rounded ${params?.sort === "product_name" && params?.order === "desc" ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
-                    >
-                      名称 Z-A
-                    </a>
+                    {(() => {
+                      const rawParams = params as Record<
+                        string,
+                        string | string[] | undefined
+                      >;
+                      const currentOrder =
+                        rawParams?.order === "desc" ? "desc" : "asc";
+                      const nextOrder =
+                        currentOrder === "desc" ? "asc" : "desc";
+
+                      // 构建新的查询参数，保留原有参数并覆盖排序参数
+                      const newParams: Record<string, string | string[]> = {
+                        ...(rawParams as any),
+                      };
+                      newParams.sort = "product_name";
+                      newParams.order = nextOrder;
+
+                      const sp = new URLSearchParams();
+                      Object.entries(newParams).forEach(([k, v]) => {
+                        if (v === undefined) return;
+                        if (Array.isArray(v)) v.forEach((x) => sp.append(k, x));
+                        else sp.append(k, v);
+                      });
+
+                      const href = `?${sp.toString()}`;
+                      const isActive =
+                        (rawParams?.sort === undefined &&
+                          currentOrder === "asc") ||
+                        rawParams?.sort === "product_name";
+                      const label =
+                        currentOrder === "desc" ? "名称：降序" : "名称：升序";
+
+                      return (
+                        <a
+                          href={href}
+                          className={`px-3 py-1 text-sm rounded ${isActive ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+                        >
+                          {label}
+                        </a>
+                      );
+                    })()}
                     <a
                       href="?sort=created_at&order=desc"
                       className={`px-3 py-1 text-sm rounded ${params?.sort === "created_at" && (!params?.order || params.order === "desc") ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
@@ -254,6 +289,7 @@ export default async function ProductsPage({
               currentPage={currentPage}
               totalPages={totalPages}
               searchParams={params as Record<string, string | string[]>}
+              brands={brands}
             />
           </div>
         </div>
