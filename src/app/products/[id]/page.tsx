@@ -2,6 +2,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server-client";
 import { notFound } from "next/navigation";
 import EditProductModal from "@/components/products/EditProductModal";
 import DeleteProductButton from "@/components/products/DeleteProductButton";
+import ProductImage from "@/components/ui/ProductImage";
 
 type ProductWithBrand = {
   id: string;
@@ -42,7 +43,7 @@ export default async function ProductPage({ params }: { params: any }) {
   const { data: product, error } = await supabase
     .from("products")
     .select(
-      `id, product_name, specification, description, brand_id, created_at, updated_at, brands:brand_id (brand_name)`,
+      `id, product_name, specification, description, brand_id, image_url, created_at, updated_at, brands:brand_id (brand_name)`,
     )
     .eq("id", id)
     .single();
@@ -124,7 +125,7 @@ export default async function ProductPage({ params }: { params: any }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <a
             href="/"
-            className="text-blue-600 hover:text-blue-800 hover:underline text-sm"
+            className="text-blue-600 hover:text-blue-800 hover:underline hover:pointer text-sm"
           >
             ← 返回首页
           </a>
@@ -150,6 +151,7 @@ export default async function ProductPage({ params }: { params: any }) {
                   specification: product.specification,
                   description: product.description,
                   brand_id: product.brand_id,
+                  image_url: product.image_url,
                 }}
                 productId={product.id}
               />
@@ -164,33 +166,69 @@ export default async function ProductPage({ params }: { params: any }) {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium mb-4 text-gray-700">详情</h3>
-          <div className="grid grid-cols-1 gap-4">
-            <div>
-              <div className="text-sm text-gray-500">规格</div>
-              <div className="mt-1 text-gray-900">
-                {product.specification || "—"}
+          <h3 className="text-lg font-medium mb-4 text-gray-700">商品详情</h3>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* 左侧：图片 */}
+            <div className="flex justify-center">
+              <div className="w-80 h-80 bg-gray-100 overflow-hidden rounded-lg">
+                <ProductImage
+                  src={product.image_url}
+                  alt={product.product_name}
+                  className="w-full h-full object-contain"
+                />
               </div>
             </div>
 
-            <div>
-              <div className="text-sm text-gray-500">描述</div>
-              <div className="mt-1 text-gray-900">
-                {product.description || "—"}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
+            {/* 右侧：详情信息 */}
+            <div className="space-y-6">
               <div>
-                <div className="text-sm text-gray-500">创建时间</div>
+                <div className="text-sm text-gray-500">规格</div>
                 <div className="mt-1 text-gray-900">
-                  {product.created_at || "—"}
+                  {product.specification || "—"}
                 </div>
               </div>
+
               <div>
-                <div className="text-sm text-gray-500">更新时间</div>
+                <div className="text-sm text-gray-500">描述</div>
                 <div className="mt-1 text-gray-900">
-                  {product.updated_at || "—"}
+                  {product.description || "—"}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <div className="text-sm text-gray-500">创建时间</div>
+                  <div className="mt-1 text-gray-900">
+                    {product.created_at
+                      ? new Date(product.created_at)
+                          .toLocaleString("zh-CN", {
+                            year: "numeric",
+                            month: "2-digit",
+                            day: "2-digit",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: false,
+                          })
+                          .replace(/\//g, "-")
+                      : "—"}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-sm text-gray-500">更新时间</div>
+                  <div className="mt-1 text-gray-900">
+                    {product.updated_at
+                      ? new Date(product.updated_at)
+                          .toLocaleString("zh-CN", {
+                            year: "numeric",
+                            month: "2-digit",
+                            day: "2-digit",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: false,
+                          })
+                          .replace(/\//g, "-")
+                      : "—"}
+                  </div>
                 </div>
               </div>
             </div>

@@ -39,7 +39,7 @@ export default function EditSupplierModal({
     <div>
       <button
         onClick={() => setIsOpen(true)}
-        className="px-3 py-1 text-sm rounded bg-gray-100 hover:bg-gray-200 transition"
+        className="px-3 py-1 text-sm rounded bg-blue-500 text-white hover:bg-blue-600 hover:pointer transition"
       >
         编辑
       </button>
@@ -48,10 +48,10 @@ export default function EditSupplierModal({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="bg-white rounded shadow max-w-lg w-full p-6 mx-4">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium">编辑供应商</h3>
+              <h3 className="text-lg font-bold text-black">编辑供应商</h3>
               <button
                 onClick={() => setIsOpen(false)}
-                className="text-gray-600 hover:text-gray-900"
+                className="px-3 py-1 text-sm text-black hover:bg-gray-100 hover:pointer font-semibold rounded"
               >
                 ×
               </button>

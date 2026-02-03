@@ -62,7 +62,7 @@ export default function SuppliersTable({
           placeholder="搜索供应商名称..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
         />
       </div>
 
@@ -97,19 +97,73 @@ export default function SuppliersTable({
                   <span className="truncate">{supplier.region}</span>
                 </div>
               )}
-              {supplier.qualification_type && (
-                <div className="text-xs text-gray-600">
-                  <strong>资质：</strong> {supplier.qualification_type}
-                </div>
-              )}
+              {(() => {
+                const validQualifications = [
+                  "优质供应商",
+                  "合规供应商",
+                  "一般供应商",
+                ];
+                const qualification = supplier.qualification_type;
+                const isValidQualification =
+                  qualification && validQualifications.includes(qualification);
+
+                if (isValidQualification) {
+                  return (
+                    <div className="text-xs text-gray-600">
+                      <strong>资质：</strong> {qualification}
+                    </div>
+                  );
+                } else if (qualification) {
+                  // 如果有值但不在有效列表中，显示为未设置
+                  return (
+                    <div className="text-xs text-gray-600">
+                      <strong>资质：</strong> 未设置
+                    </div>
+                  );
+                }
+                return null;
+              })()}
               {supplier.delivery_speed && (
                 <div className="text-xs text-gray-600">
                   <strong>送货：</strong> {supplier.delivery_speed}
                 </div>
               )}
-              {supplier.product_quality && (
+              {supplier.product_quality !== undefined && (
                 <div className="text-xs text-gray-600">
-                  <strong>品质：</strong> {supplier.product_quality}/5
+                  <strong>商品：</strong>
+                  <span className="ml-1">
+                    {[...Array(5)].map((_, i) => (
+                      <span
+                        key={i}
+                        className={
+                          i < Number(supplier.product_quality)
+                            ? "text-orange-400"
+                            : "text-gray-300"
+                        }
+                      >
+                        ★
+                      </span>
+                    ))}
+                  </span>
+                </div>
+              )}
+              {supplier.packaging !== undefined && (
+                <div className="text-xs text-gray-600">
+                  <strong>包装：</strong>
+                  <span className="ml-1">
+                    {[...Array(5)].map((_, i) => (
+                      <span
+                        key={i}
+                        className={
+                          i < Number(supplier.packaging)
+                            ? "text-orange-400"
+                            : "text-gray-300"
+                        }
+                      >
+                        ★
+                      </span>
+                    ))}
+                  </span>
                 </div>
               )}
               {supplier.total_orders !== undefined && (

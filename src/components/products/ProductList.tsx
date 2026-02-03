@@ -105,8 +105,13 @@ export default function ProductList({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="bg-white rounded shadow max-w-lg w-full p-6">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium">编辑商品</h3>
-              <button onClick={() => setEditing(null)}>关闭</button>
+              <h3 className="text-lg font-bold text-black">编辑商品</h3>
+              <button
+                onClick={() => setEditing(null)}
+                className="px-3 py-1 text-sm text-black hover:bg-gray-100 hover:pointer font-semibold rounded"
+              >
+                关闭
+              </button>
             </div>
             <ProductForm
               brands={brands}
@@ -135,7 +140,7 @@ export default function ProductList({
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setDeleting(null)}
-                className="px-3 py-1 rounded border"
+                className="px-3 py-1 rounded border hover:pointer hover:bg-gray-50"
               >
                 取消
               </button>
@@ -153,7 +158,7 @@ export default function ProductList({
                     alert("删除失败，请查看控制台");
                   }
                 }}
-                className="px-4 py-2 bg-red-600 text-white rounded"
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 hover:pointer"
               >
                 删除
               </button>

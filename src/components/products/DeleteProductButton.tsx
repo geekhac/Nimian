@@ -34,7 +34,7 @@ export default function DeleteProductButton({ productId, productName }: Props) {
     <div>
       <button
         onClick={() => setOpen(true)}
-        className="px-3 py-1 rounded bg-red-50 text-red-600"
+        className="px-3 py-1 rounded bg-red-50 text-red-600 hover:bg-red-100 hover:pointer"
       >
         删除
       </button>
@@ -49,14 +49,14 @@ export default function DeleteProductButton({ productId, productName }: Props) {
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setOpen(false)}
-                className="px-3 py-1 rounded border"
+                className="px-3 py-1 rounded border hover:pointer hover:bg-gray-50"
               >
                 取消
               </button>
               <button
                 onClick={handleDelete}
                 disabled={loading}
-                className="px-4 py-2 bg-red-600 text-white rounded"
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 hover:pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? "删除中..." : "删除"}
               </button>

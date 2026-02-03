@@ -25,21 +25,36 @@ async function getStats() {
       { count: suppliers },
       { count: supplies },
     ] = await Promise.all([
-      supabase.from("merchants").select("id", { count: "exact" }).then((r) => ({
-        count: r.count || 0,
-      })),
-      supabase.from("brands").select("id", { count: "exact" }).then((r) => ({
-        count: r.count || 0,
-      })),
-      supabase.from("products").select("id", { count: "exact" }).then((r) => ({
-        count: r.count || 0,
-      })),
-      supabase.from("supplier_assessment").select("id", { count: "exact" }).then((r) => ({
-        count: r.count || 0,
-      })),
-      supabase.from("supply_records").select("id", { count: "exact" }).then((r) => ({
-        count: r.count || 0,
-      })),
+      supabase
+        .from("merchants")
+        .select("id", { count: "exact" })
+        .then((r) => ({
+          count: r.count || 0,
+        })),
+      supabase
+        .from("brands")
+        .select("id", { count: "exact" })
+        .then((r) => ({
+          count: r.count || 0,
+        })),
+      supabase
+        .from("products")
+        .select("id", { count: "exact" })
+        .then((r) => ({
+          count: r.count || 0,
+        })),
+      supabase
+        .from("supplier_assessment")
+        .select("id", { count: "exact" })
+        .then((r) => ({
+          count: r.count || 0,
+        })),
+      supabase
+        .from("supply_records")
+        .select("id", { count: "exact" })
+        .then((r) => ({
+          count: r.count || 0,
+        })),
     ]);
 
     return {
@@ -146,9 +161,21 @@ export default async function HomePage() {
 
   const recentActivities = [
     { action: "新商品上架", merchant: `共${stats.products}件`, time: "实时" },
-    { action: "商品关联品牌", merchant: `共${stats.brands}个品牌`, time: "实时" },
-    { action: "供货价格配置", merchant: `共${stats.supplies}条记录`, time: "实时" },
-    { action: "供应商数量", merchant: `共${stats.suppliers}家供应商`, time: "实时" },
+    {
+      action: "商品关联品牌",
+      merchant: `共${stats.brands}个品牌`,
+      time: "实时",
+    },
+    {
+      action: "供货价格配置",
+      merchant: `共${stats.supplies}条记录`,
+      time: "实时",
+    },
+    {
+      action: "供应商数量",
+      merchant: `共${stats.suppliers}家供应商`,
+      time: "实时",
+    },
   ];
 
   return (
@@ -164,7 +191,7 @@ export default async function HomePage() {
               </h1>
             </div>
             <div className="flex items-center space-x-4">
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 hover:pointer transition-colors flex items-center">
                 <Settings className="w-4 h-4 mr-2" />
                 系统设置
               </button>
@@ -257,7 +284,11 @@ export default async function HomePage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {navigationCards.map((card) => (
-                <Link key={card.title} href={card.href} className="group">
+                <Link
+                  key={card.title}
+                  href={card.href}
+                  className="group hover:pointer"
+                >
                   <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border hover:border-blue-200">
                     <div className="p-6">
                       <div className="flex items-start justify-between mb-4">
@@ -301,7 +332,7 @@ export default async function HomePage() {
                   <Link
                     key={action.name}
                     href={action.href}
-                    className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors group"
+                    className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 hover:pointer transition-colors group"
                   >
                     <div className="flex items-center">
                       <div className="p-2 bg-gray-100 rounded-lg mr-3 group-hover:bg-blue-50 transition-colors">

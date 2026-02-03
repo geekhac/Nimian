@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import ProductImage from "@/components/ui/ProductImage";
 
 interface Product {
   id: string;
@@ -58,15 +59,13 @@ export default function ProductCard({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        {product.image_url ? (
-          <div className="w-full h-36 bg-gray-100 overflow-hidden">
-            <img
-              src={product.image_url}
-              alt={product.product_name}
-              className="w-full h-full object-cover"
-            />
-          </div>
-        ) : null}
+        <div className="w-full h-36 bg-gray-100 overflow-hidden">
+          <ProductImage
+            src={product.image_url}
+            alt={product.product_name}
+            className="w-full h-full object-cover"
+          />
+        </div>
 
         <div className="p-3">
           {/* 品牌 + 商品名称 - 同一行，高亮显示 */}
@@ -75,14 +74,16 @@ export default function ProductCard({
               <span className="text-purple-600 font-bold">
                 {product.brands?.brand_name || "未分类"}
               </span>
-              <span className="font-bold text-gray-900">{product.product_name}</span>
+              <span className="font-bold text-gray-900">
+                {product.product_name}
+              </span>
             </p>
           </div>
 
           {/* 操作按钮 */}
           <div className="flex gap-1">
             <button
-              className="flex-1 px-2 py-1.5 text-xs rounded bg-blue-50 text-blue-600 hover:bg-blue-100 transition"
+              className="flex-1 px-2 py-1.5 text-xs rounded bg-blue-500 text-white hover:bg-blue-600 hover:pointer transition"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -92,7 +93,7 @@ export default function ProductCard({
               编辑
             </button>
             <button
-              className="flex-1 px-2 py-1.5 text-xs rounded bg-red-50 text-red-600 hover:bg-red-100 transition"
+              className="flex-1 px-2 py-1.5 text-xs rounded bg-red-50 text-red-600 hover:bg-red-100 hover:pointer transition"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();

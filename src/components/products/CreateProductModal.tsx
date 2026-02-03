@@ -15,7 +15,7 @@ export default function CreateProductModal({ brands }: Props) {
     <div>
       <button
         onClick={() => setOpen(true)}
-        className="px-4 py-2 bg-green-600 text-white rounded"
+        className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 hover:pointer"
       >
         新建商品
       </button>
@@ -25,7 +25,12 @@ export default function CreateProductModal({ brands }: Props) {
           <div className="bg-white rounded shadow max-w-lg w-full p-6">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-medium">创建商品</h3>
-              <button onClick={() => setOpen(false)}>关闭</button>
+              <button
+                onClick={() => setOpen(false)}
+                className="px-3 py-1 text-sm text-black hover:bg-gray-100 hover:pointer font-semibold rounded"
+              >
+                关闭
+              </button>
             </div>
 
             <ProductForm brands={brands} onSuccess={() => setOpen(false)} />
