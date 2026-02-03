@@ -28,6 +28,7 @@ async function getProducts(searchParams: Promise<SearchParams> | SearchParams) {
       specification,
       description,
       brand_id,
+      image_url,
       brands:brand_id (
         brand_name
       )

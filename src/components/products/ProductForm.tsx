@@ -24,6 +24,9 @@ export default function ProductForm({
   const [brandId, setBrandId] = useState<string>(
     initial.brand_id || brands[0]?.id || "",
   );
+  const [imageUrl, setImageUrl] = useState<string>(
+    (initial as any).image_url || "",
+  );
   const initialBrandName =
     brands.find((b) => b.id === initial.brand_id)?.brand_name ||
     brands[0]?.brand_name ||
@@ -40,6 +43,7 @@ export default function ProductForm({
         specification: spec || null,
         description: desc || null,
         brand_id: brandId || null,
+        image_url: imageUrl || null,
       };
 
       const url = `/api/products${productId ? `?id=${productId}` : ""}`;
@@ -142,6 +146,15 @@ export default function ProductForm({
             <option key={b.id} value={b.brand_name} />
           ))}
         </datalist>
+        <div className="mt-3">
+          <label className="block text-sm font-medium text-gray-700">图片链接</label>
+          <input
+            value={imageUrl}
+            onChange={(e) => setImageUrl(e.target.value)}
+            placeholder="https://..."
+            className="mt-1 block w-full rounded-md border-gray-200 text-gray-800 placeholder-gray-400"
+          />
+        </div>
       </div>
 
       <div className="flex justify-end">

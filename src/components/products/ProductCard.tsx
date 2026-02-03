@@ -9,6 +9,7 @@ interface Product {
   specification: string | null;
   description: string | null;
   brand_id: string;
+  image_url?: string | null;
   brands: {
     brand_name: string;
   };
@@ -57,6 +58,16 @@ export default function ProductCard({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
+        {product.image_url ? (
+          <div className="w-full h-36 bg-gray-100 overflow-hidden">
+            <img
+              src={product.image_url}
+              alt={product.product_name}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        ) : null}
+
         <div className="p-3">
           {/* 品牌 + 商品名称 - 同一行，高亮显示 */}
           <div className="mb-3">

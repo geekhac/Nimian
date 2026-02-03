@@ -13,6 +13,7 @@ interface ProductListProps {
     specification: string | null;
     description: string | null;
     brand_id: string;
+    image_url?: string | null;
     brands: {
       brand_name: string;
     };
@@ -113,6 +114,7 @@ export default function ProductList({
                 specification: editing.specification,
                 description: editing.description,
                 brand_id: editing.brand_id,
+                image_url: editing.image_url,
               }}
               productId={editing.id}
               onSuccess={() => setEditing(null)}

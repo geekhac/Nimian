@@ -20,6 +20,7 @@ export async function GET(request: NextRequest) {
         specification,
         description,
         brand_id,
+        image_url,
         created_at,
         updated_at,
         brands:brand_id (brand_name)
