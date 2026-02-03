@@ -40,7 +40,7 @@ export default function EditSupplyRecordModal({
     <div>
       <button
         onClick={() => setIsOpen(true)}
-        className="px-3 py-1 text-sm text-gray-900 rounded bg-gray-100 hover:bg-gray-200 hover:pointer transition"
+        className="px-3 py-1 text-sm text-gray-900 rounded bg-gray-100 hover:bg-gray-200 cursor-pointer hover:pointer transition"
       >
         编辑
       </button>
@@ -52,7 +52,7 @@ export default function EditSupplyRecordModal({
               <h3 className="text-lg font-bold text-black">编辑供应链</h3>
               <button
                 onClick={() => setIsOpen(false)}
-                className="text-gray-600 hover:text-gray-900"
+                className="text-gray-600 hover:text-gray-900 cursor-pointer hover:pointer"
               >
                 ×
               </button>

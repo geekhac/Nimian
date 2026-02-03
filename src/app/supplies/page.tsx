@@ -145,7 +145,7 @@ export default function SuppliesPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-3 bg-red-100 rounded-lg">
+              <div className="p-3 bg-red-100 rounded-lg hover:pointer cursor-pointer">
                 <Layers className="w-8 h-8 text-red-600" />
               </div>
               <div>
@@ -167,11 +167,14 @@ export default function SuppliesPage() {
       {/* 内容区域 */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {loading ? (
-          <div className="bg-white rounded-lg shadow p-6 text-center">
+          <div className="bg-white rounded-lg shadow p-6 text-center hover:pointer">
             <div className="text-gray-500">加载中...</div>
           </div>
         ) : (
-          <div key={records.length} className="bg-white rounded-lg shadow p-6">
+          <div
+            key={records.length}
+            className="bg-white rounded-lg shadow p-6 hover:pointer"
+          >
             <SupplyRecordsTable
               records={records as any}
               products={products}

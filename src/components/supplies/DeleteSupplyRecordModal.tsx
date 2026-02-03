@@ -43,7 +43,7 @@ export default function DeleteSupplyRecordModal({
     <div>
       <button
         onClick={() => setIsOpen(true)}
-        className="px-3 py-1 text-sm rounded bg-red-50 text-red-600 hover:bg-red-100 hover:pointer transition"
+        className="px-3 py-1 text-sm rounded bg-red-50 text-red-600 hover:bg-red-100 cursor-pointer hover:pointer transition"
       >
         删除
       </button>
@@ -55,7 +55,7 @@ export default function DeleteSupplyRecordModal({
               <h3 className="text-lg font-medium">确认删除</h3>
               <button
                 onClick={() => setIsOpen(false)}
-                className="text-gray-600 hover:text-gray-900"
+                className="text-gray-600 hover:text-gray-900 cursor-pointer hover:pointer"
               >
                 ×
               </button>
@@ -68,14 +68,14 @@ export default function DeleteSupplyRecordModal({
               <button
                 onClick={() => setIsOpen(false)}
                 disabled={isLoading}
-                className="px-3 py-2 rounded border border-gray-300 hover:bg-gray-50 transition"
+                className="px-3 py-2 rounded border border-gray-300 hover:bg-gray-50 cursor-pointer hover:pointer transition"
               >
                 取消
               </button>
               <button
                 onClick={handleDelete}
                 disabled={isLoading}
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition disabled:opacity-50"
+                className="px-3 py-2 rounded bg-red-600 text-white hover:bg-red-700 transition cursor-pointer hover:pointer disabled:cursor-not-allowed"
               >
                 {isLoading ? "删除中..." : "删除"}
               </button>
