@@ -83,7 +83,7 @@ async function getProducts(searchParams: Promise<SearchParams> | SearchParams) {
   const products = (data || []).map((product) => {
     const brandName = Array.isArray(product.brands)
       ? product.brands[0]?.brand_name
-      : product.brands?.brand_name;
+      : (product.brands as any)?.brand_name;
 
     return {
       id: product.id,

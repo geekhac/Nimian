@@ -16,10 +16,10 @@ export interface Product {
 export interface Brand {
   id: string;
   brand_name: string;
-  registered_location: string | null;
-  core_category_focus: string[];
-  created_at: string;
-  updated_at: string;
+  registered_location?: string | null;
+  core_category_focus?: string[];
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface ProductWithRelations extends Product {

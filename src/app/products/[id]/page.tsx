@@ -115,7 +115,7 @@ export default async function ProductPage({ params }: { params: any }) {
 
   const brandName = Array.isArray(product.brands)
     ? product.brands[0]?.brand_name
-    : product.brands?.brand_name;
+    : (product.brands as any)?.brand_name;
 
   return (
     <div className="min-h-screen bg-gray-50">

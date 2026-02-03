@@ -5,6 +5,7 @@ import ProductCard from "@/components/products/ProductCard";
 import Pagination from "../shared/Pagination";
 import CreateProductModal from "./CreateProductModal";
 import ProductForm from "./ProductForm";
+import { Brand } from "@/types";
 
 interface ProductListProps {
   products: Array<{
@@ -21,7 +22,7 @@ interface ProductListProps {
   currentPage: number;
   totalPages: number;
   searchParams: Record<string, string | string[] | undefined>;
-  brands: Array<{ id: string; brand_name: string }>;
+  brands: Brand[];
 }
 
 export default function ProductList({
