@@ -52,7 +52,7 @@ export default function ProductFilters({
             className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1"
           >
             <X className="w-4 h-4" />
-            Clear all
+            清除全部
           </FilterLink>
         )}
       </div>

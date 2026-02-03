@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { Copy, Check } from "lucide-react";
 import ProductImage from "@/components/ui/ProductImage";
 
 interface Product {
@@ -28,6 +29,34 @@ export default function ProductCard({
   onDelete,
 }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const [copiedProduct, setCopiedProduct] = useState<string | null>(null);
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      // 优先使用现代 clipboard API
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        // 降级到传统方法
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+      }
+      setCopiedProduct(text);
+      setTimeout(() => setCopiedProduct(null), 2000);
+    } catch (err) {
+      console.error("复制失败:", err);
+      // 最后的降级方案：显示文本让用户手动复制
+      alert(`复制失败，请手动复制：${text}`);
+    }
+  };
 
   const rawId = product?.id;
   const uuidRegex =
@@ -70,14 +99,33 @@ export default function ProductCard({
         <div className="p-3">
           {/* 品牌 + 商品名称 - 同一行，高亮显示 */}
           <div className="mb-3">
-            <p className="text-xs font-bold text-gray-900">
-              <span className="text-purple-600 font-bold">
-                {product.brands?.brand_name || "未分类"}
-              </span>
-              <span className="font-bold text-gray-900">
-                {product.product_name}
-              </span>
-            </p>
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-bold text-gray-900 flex-1 mr-2">
+                <span className="text-purple-600 font-bold">
+                  {product.brands?.brand_name || "未分类"}
+                </span>
+                <span className="font-bold text-gray-900">
+                  {product.product_name}
+                </span>
+              </p>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const fullProductName = `${product.brands?.brand_name || "未分类"}${product.product_name}`;
+                  copyToClipboard(fullProductName);
+                }}
+                className="p-1 text-gray-400 hover:text-gray-600 cursor-pointer hover:pointer transition flex-shrink-0"
+                title="复制商品名称"
+              >
+                {copiedProduct ===
+                `${product.brands?.brand_name || "未分类"}${product.product_name}` ? (
+                  <Check className="w-3 h-3 text-green-600" />
+                ) : (
+                  <Copy className="w-3 h-3" />
+                )}
+              </button>
+            </div>
           </div>
 
           {/* 操作按钮 */}

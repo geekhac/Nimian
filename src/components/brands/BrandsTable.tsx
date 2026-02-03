@@ -2,19 +2,11 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Edit2,
-  Trash2,
-  Eye,
-  MoreVertical,
-  CheckCircle,
-  XCircle,
-  Globe,
-} from "lucide-react";
+import { Edit2, Trash2, Eye, CheckCircle, Globe } from "lucide-react";
 import EditBrandModal from "./EditBrandModal";
 import DeleteBrandModal from "./DeleteBrandModal";
 import ViewBrandModal from "./ViewBrandModal";
-import { Package, Plus } from "lucide-react";
+import { Package } from "lucide-react";
 
 interface Brand {
   id: string;
@@ -34,24 +26,20 @@ export default function BrandsTable({ brands }: BrandsTableProps) {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
-  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
   const handleEdit = (brand: Brand) => {
     setSelectedBrand(brand);
     setEditModalOpen(true);
-    setActiveDropdown(null);
   };
 
   const handleDelete = (brand: Brand) => {
     setSelectedBrand(brand);
     setDeleteModalOpen(true);
-    setActiveDropdown(null);
   };
 
   const handleView = (brand: Brand) => {
     setSelectedBrand(brand);
     setViewModalOpen(true);
-    setActiveDropdown(null);
   };
 
   const formatDate = (dateString: string) => {
@@ -182,45 +170,28 @@ export default function BrandsTable({ brands }: BrandsTableProps) {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="relative">
+                    <div className="flex items-center gap-2">
                       <button
-                        onClick={() =>
-                          setActiveDropdown(
-                            activeDropdown === brand.id ? null : brand.id,
-                          )
-                        }
-                        className="p-1 hover:bg-gray-100 rounded"
+                        onClick={() => handleView(brand)}
+                        className="p-1.5 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors cursor-pointer hover:pointer"
+                        title="查看详情"
                       >
-                        <MoreVertical className="w-5 h-5 text-gray-500" />
+                        <Eye className="w-4 h-4" />
                       </button>
-
-                      {activeDropdown === brand.id && (
-                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
-                          <div className="py-1">
-                            <button
-                              onClick={() => handleView(brand)}
-                              className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                            >
-                              <Eye className="w-4 h-4 mr-2" />
-                              查看详情
-                            </button>
-                            <button
-                              onClick={() => handleEdit(brand)}
-                              className="flex items-center w-full px-4 py-2 text-sm text-blue-600 hover:bg-gray-100"
-                            >
-                              <Edit2 className="w-4 h-4 mr-2" />
-                              编辑品牌
-                            </button>
-                            <button
-                              onClick={() => handleDelete(brand)}
-                              className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                            >
-                              <Trash2 className="w-4 h-4 mr-2" />
-                              删除品牌
-                            </button>
-                          </div>
-                        </div>
-                      )}
+                      <button
+                        onClick={() => handleEdit(brand)}
+                        className="p-1.5 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors cursor-pointer hover:pointer"
+                        title="编辑品牌"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(brand)}
+                        className="p-1.5 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded transition-colors cursor-pointer hover:pointer"
+                        title="删除品牌"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   </td>
                 </tr>

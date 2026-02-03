@@ -25,6 +25,7 @@ interface SupplyRecordFormProps {
     valid_from?: string;
     valid_until?: string;
     notes?: string;
+    purchase_link?: string; // 新增购买链接字段
   };
   recordId?: string;
   onSuccess?: () => void;
@@ -53,6 +54,7 @@ export default function SupplyRecordForm({
         .toISOString()
         .split("T")[0],
     notes: initial?.notes || "",
+    purchase_link: initial?.purchase_link || "", // 新增购买链接字段
   });
 
   const [priceTiers, setPriceTiers] = useState<PriceTier[]>(
@@ -238,6 +240,7 @@ export default function SupplyRecordForm({
           processedPriceTiers.length > 0 ? processedPriceTiers : null,
         valid_from: formData.valid_from || null,
         valid_until: formData.valid_until || null,
+        purchase_link: formData.purchase_link || null, // 新增购买链接字段
       };
 
       const method = recordId ? "PUT" : "POST";
@@ -614,6 +617,23 @@ export default function SupplyRecordForm({
             启用此供应链
           </span>
         </label>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-1 text-gray-900">
+          购买链接 <span className="text-gray-500 font-normal">(可选)</span>
+        </label>
+        <input
+          type="url"
+          name="purchase_link"
+          value={formData.purchase_link}
+          onChange={handleChange}
+          placeholder="https://example.com/product"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium mb-1 text-gray-900 placeholder-gray-500"
+        />
+        <p className="text-xs text-gray-500 mt-1">
+          供应商的购买页面链接，用户可直接点击购买
+        </p>
       </div>
 
       <div>

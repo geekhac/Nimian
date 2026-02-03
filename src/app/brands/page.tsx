@@ -158,7 +158,7 @@ export default async function BrandsPage({
             <span className="text-sm text-gray-700 font-medium">地区筛选:</span>
             <a
               href="?location=all"
-              className={`px-3 py-1 rounded-full text-sm ${!locationValue || locationValue === "all" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+              className={`px-3 py-1 rounded-full text-sm cursor-pointer hover:pointer ${!locationValue || locationValue === "all" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
             >
               全部
             </a>
@@ -166,7 +166,7 @@ export default async function BrandsPage({
               <a
                 key={location}
                 href={`?location=${encodeURIComponent(location)}`}
-                className={`px-3 py-1 rounded-full text-sm ${locationValue === location ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+                className={`px-3 py-1 rounded-full text-sm cursor-pointer hover:pointer ${locationValue === location ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
               >
                 {location}
               </a>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Truck, Mail, Phone, MapPin } from "lucide-react";
+import { Truck, MapPin, Copy, Check } from "lucide-react";
 import EditSupplierModal from "./EditSupplierModal";
 import DeleteSupplierModal from "./DeleteSupplierModal";
 
@@ -18,6 +18,7 @@ interface Supplier {
   total_orders?: number;
   problem_orders?: number;
   region?: string;
+  supplier_link?: string | null;
   created_at?: string;
 }
 
@@ -31,6 +32,34 @@ export default function SuppliersTable({
   onRefresh,
 }: SuppliersTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
+  const [copiedSupplier, setCopiedSupplier] = useState<string | null>(null);
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      // 优先使用现代 clipboard API
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        // 降级到传统方法
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+      }
+      setCopiedSupplier(text);
+      setTimeout(() => setCopiedSupplier(null), 2000);
+    } catch (err) {
+      console.error("复制失败:", err);
+      // 最后的降级方案：显示文本让用户手动复制
+      alert(`复制失败，请手动复制：${text}`);
+    }
+  };
 
   const filteredSuppliers = useMemo(() => {
     if (!searchTerm) return suppliers;
@@ -74,14 +103,39 @@ export default function SuppliersTable({
             className="bg-white rounded-lg shadow p-6 hover:shadow-md transition"
           >
             <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-orange-100 rounded-lg">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div className="p-2 bg-orange-100 rounded-lg flex-shrink-0">
                   <Truck className="w-5 h-5 text-orange-600" />
                 </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 truncate">
-                    {supplier.supplier_name}
-                  </h3>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    {supplier.supplier_link ? (
+                      <a
+                        href={supplier.supplier_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-semibold text-green-600 hover:text-green-800 hover:underline truncate cursor-pointer hover:pointer transition"
+                        title={supplier.supplier_name}
+                      >
+                        {supplier.supplier_name}
+                      </a>
+                    ) : (
+                      <h3 className="font-semibold text-gray-900 truncate">
+                        {supplier.supplier_name}
+                      </h3>
+                    )}
+                    <button
+                      onClick={() => copyToClipboard(supplier.supplier_name)}
+                      className="p-1 text-gray-400 hover:text-gray-600 cursor-pointer hover:pointer transition flex-shrink-0"
+                      title="复制供应商名称"
+                    >
+                      {copiedSupplier === supplier.supplier_name ? (
+                        <Check className="w-4 h-4 text-green-600" />
+                      ) : (
+                        <Copy className="w-4 h-4" />
+                      )}
+                    </button>
+                  </div>
                   <p className="text-xs text-gray-600 mt-1">
                     {supplier.supply_channel || "未指定"}
                   </p>

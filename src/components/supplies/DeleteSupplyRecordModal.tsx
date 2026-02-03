@@ -60,7 +60,7 @@ export default function DeleteSupplyRecordModal({
                 ×
               </button>
             </div>
-            <p className="text-sm text-gray-600 mb-6">
+            <p className="text-sm text-gray-900 mb-6">
               确定要删除「{productName}」由「{supplierName}
               」供应的供应链吗？此操作不可恢复。
             </p>

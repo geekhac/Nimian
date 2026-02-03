@@ -22,6 +22,7 @@ interface Supplier {
   product_quality?: number;
   packaging?: number;
   region?: string;
+  supplier_link?: string | null;
   created_at?: string;
 }
 

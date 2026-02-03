@@ -19,6 +19,7 @@ interface SupplierFormProps {
     product_quality?: number;
     packaging?: number;
     region?: string;
+    supplier_link?: string;
   };
   supplierId?: string | number;
   onSuccess?: () => void;
@@ -69,6 +70,7 @@ export default function SupplierForm({
     product_quality: initial?.product_quality?.toString() || "5",
     packaging: initial?.packaging?.toString() || "5",
     region: initial?.region || "",
+    supplier_link: initial?.supplier_link || "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -210,6 +212,21 @@ export default function SupplierForm({
             placeholder="输入地区"
           />
         </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-1 text-gray-900">
+          供应商链接 <span className="text-gray-500 font-normal">(可选)</span>
+        </label>
+        <input
+          type="url"
+          name="supplier_link"
+          value={formData.supplier_link}
+          onChange={handleChange}
+          placeholder="https://example.com"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
+        />
+        <p className="text-xs text-gray-500 mt-1">供应商官网或业务页面链接</p>
       </div>
 
       <div>

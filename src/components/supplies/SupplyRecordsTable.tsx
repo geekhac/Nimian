@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Package, Truck } from "lucide-react";
+import { Package, Copy, Check } from "lucide-react";
+import ProductImage from "@/components/ui/ProductImage";
 import EditSupplyRecordModal from "./EditSupplyRecordModal";
 import DeleteSupplyRecordModal from "./DeleteSupplyRecordModal";
 
@@ -25,6 +26,7 @@ interface SupplyRecord {
   notes?: string;
   products?: { id: string; product_name: string };
   supplier_assessment?: { id: number; supplier_name: string };
+  purchase_link?: string | null;
 }
 
 interface SupplyRecordsTableProps {
@@ -44,6 +46,34 @@ export default function SupplyRecordsTable({
   const [filterBy, setFilterBy] = useState<"all" | "product" | "supplier">(
     "all",
   );
+  const [copiedProduct, setCopiedProduct] = useState<string | null>(null);
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      // 优先使用现代 clipboard API
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        // 降级到传统方法
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+      }
+      setCopiedProduct(text);
+      setTimeout(() => setCopiedProduct(null), 2000);
+    } catch (err) {
+      console.error("复制失败:", err);
+      // 最后的降级方案：显示文本让用户手动复制
+      alert(`复制失败，请手动复制：${text}`);
+    }
+  };
 
   const filteredRecords = useMemo(() => {
     let result = records;
@@ -111,34 +141,70 @@ export default function SupplyRecordsTable({
 
       {/* 供应链列表 - 分组显示 */}
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse">
+        <table
+          className="w-full border-collapse table-fixed"
+          style={{ minWidth: "1200px" }}
+        >
           <thead>
             <tr className="bg-gray-50 border-b border-gray-200">
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">
+              <th
+                className="px-4 py-3 text-left text-sm font-semibold text-gray-900"
+                style={{ width: "320px" }}
+              >
                 商品
               </th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">
+              <th
+                className="px-4 py-3 text-left text-sm font-semibold text-gray-900"
+                style={{ width: "140px" }}
+              >
                 供应商
               </th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">
+              <th
+                className="px-4 py-3 text-left text-sm font-semibold text-gray-900"
+                style={{ width: "100px" }}
+              >
                 价格
               </th>
-              <th className="px-4 py-3 text-center text-sm font-semibold text-gray-900">
+              <th
+                className="px-4 py-3 text-center text-sm font-semibold text-gray-900"
+                style={{ width: "90px" }}
+              >
                 最小订购量
               </th>
-              <th className="px-4 py-3 text-center text-sm font-semibold text-gray-900">
+              <th
+                className="px-4 py-3 text-center text-sm font-semibold text-gray-900"
+                style={{ width: "80px" }}
+              >
                 交付天数
               </th>
-              <th className="px-4 py-3 text-center text-sm font-semibold text-gray-900">
+              <th
+                className="px-4 py-3 text-center text-sm font-semibold text-gray-900"
+                style={{ width: "70px" }}
+              >
                 授权
               </th>
-              <th className="px-4 py-3 text-center text-sm font-semibold text-gray-900">
+              <th
+                className="px-4 py-3 text-center text-sm font-semibold text-gray-900"
+                style={{ width: "70px" }}
+              >
                 资质证书
               </th>
-              <th className="px-4 py-3 text-center text-sm font-semibold text-gray-900">
+              <th
+                className="px-4 py-3 text-center text-sm font-semibold text-gray-900"
+                style={{ width: "90px" }}
+              >
+                购买链接
+              </th>
+              <th
+                className="px-4 py-3 text-center text-sm font-semibold text-gray-900"
+                style={{ width: "70px" }}
+              >
                 状态
               </th>
-              <th className="px-4 py-3 text-center text-sm font-semibold text-gray-900">
+              <th
+                className="px-4 py-3 text-center text-sm font-semibold text-gray-900"
+                style={{ width: "110px" }}
+              >
                 操作
               </th>
             </tr>
@@ -150,7 +216,7 @@ export default function SupplyRecordsTable({
                 const brand = product?.brands?.brand_name;
                 const productName = product?.product_name || "未知";
                 const displayName = brand
-                  ? `${brand} ${productName}`
+                  ? `${brand}${productName}`
                   : productName;
                 const supplierCount = productRecords.length;
 
@@ -161,13 +227,49 @@ export default function SupplyRecordsTable({
                   >
                     <td className="px-4 py-3 text-sm text-gray-900">
                       {idx === 0 && (
-                        <div className="flex items-center gap-2">
-                          <span>{displayName}</span>
-                          {supplierCount > 1 && (
-                            <span className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded">
-                              {supplierCount}个供应商
-                            </span>
-                          )}
+                        <div className="flex items-center gap-3">
+                          {/* 商品图片 */}
+                          <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                            <ProductImage
+                              src={(product as any)?.image_url}
+                              alt={displayName}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+
+                          {/* 商品名称和复制按钮 */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start gap-2">
+                              <a
+                                href={`/products/${record.product_id}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="break-words flex-1 min-w-0 text-green-600 hover:text-green-800 hover:underline cursor-pointer hover:pointer transition"
+                                title={displayName}
+                              >
+                                {displayName}
+                              </a>
+                              <button
+                                onClick={() =>
+                                  copyToClipboard(displayName.replace(" ", ""))
+                                }
+                                className="p-1 text-gray-400 hover:text-gray-600 cursor-pointer hover:pointer transition flex-shrink-0 mt-1"
+                                title="复制商品名称"
+                              >
+                                {copiedProduct ===
+                                displayName.replace(" ", "") ? (
+                                  <Check className="w-4 h-4 text-green-600" />
+                                ) : (
+                                  <Copy className="w-4 h-4" />
+                                )}
+                              </button>
+                            </div>
+                            {supplierCount > 1 && (
+                              <span className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded inline-block mt-1 whitespace-nowrap">
+                                {supplierCount}个供应商
+                              </span>
+                            )}
+                          </div>
                         </div>
                       )}
                     </td>
@@ -246,6 +348,22 @@ export default function SupplyRecordsTable({
                       ) : (
                         <span className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded">
                           无
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-center">
+                      {record.purchase_link ? (
+                        <a
+                          href={record.purchase_link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3 py-1 text-xs bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded hover:from-blue-600 hover:to-blue-700 cursor-pointer hover:pointer transition inline-flex items-center gap-1 font-semibold shadow-sm hover:shadow-md"
+                        >
+                          跳转
+                        </a>
+                      ) : (
+                        <span className="px-2 py-1 text-xs bg-gray-100 text-gray-500 rounded">
+                          无链接
                         </span>
                       )}
                     </td>

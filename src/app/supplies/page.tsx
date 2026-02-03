@@ -26,12 +26,14 @@ async function getSupplyRecords() {
       valid_from,
       valid_until,
       notes,
+      purchase_link,
       created_at,
       updated_at,
       products (
         id,
         product_name,
         brand_id,
+        image_url,
         brands (
           id,
           brand_name
