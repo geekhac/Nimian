@@ -238,7 +238,7 @@ export default function SupplierForm({
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
           >
             {QUALIFICATION_TYPES.map((q) => (
-              <option key={q} value={q}>
+              <option key={q} value={q} className="text-gray-900">
                 {q}
               </option>
             ))}
@@ -255,7 +255,7 @@ export default function SupplierForm({
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
           >
             {SUPPLY_CHANNELS.map((s) => (
-              <option key={s} value={s}>
+              <option key={s} value={s} className="text-gray-900">
                 {s}
               </option>
             ))}
@@ -289,7 +289,7 @@ export default function SupplierForm({
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
           >
             {DELIVERY_SPEEDS.map((d) => (
-              <option key={d} value={d}>
+              <option key={d} value={d} className="text-gray-900">
                 {d}
               </option>
             ))}

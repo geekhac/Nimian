@@ -43,7 +43,7 @@ export default function DeleteSupplyRecordModal({
     <div>
       <button
         onClick={() => setIsOpen(true)}
-        className="px-3 py-1 text-sm rounded bg-red-50 text-red-600 hover:bg-red-100 transition"
+        className="px-3 py-1 text-sm rounded bg-red-50 text-red-600 hover:bg-red-100 hover:pointer transition"
       >
         删除
       </button>

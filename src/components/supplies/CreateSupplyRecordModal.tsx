@@ -25,7 +25,7 @@ export default function CreateSupplyRecordModal({
     <div>
       <button
         onClick={() => setIsOpen(true)}
-        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 hover:pointer transition"
       >
         + 新增供应链
       </button>
@@ -34,10 +34,10 @@ export default function CreateSupplyRecordModal({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="bg-white rounded shadow max-w-lg w-full p-6 mx-4">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium">新增供应链</h3>
+              <h3 className="text-lg font-bold text-black">新增供应链</h3>
               <button
                 onClick={() => setIsOpen(false)}
-                className="text-gray-600 hover:text-gray-900"
+                className="px-3 py-1 text-sm text-black hover:bg-gray-100 hover:pointer font-semibold rounded"
               >
                 ×
               </button>

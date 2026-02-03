@@ -1,10 +1,13 @@
-import { createSupabaseServerClient } from "@/lib/supabase/server-client";
+"use client";
+
+import { useState, useEffect } from "react";
+import { createSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 import SupplyRecordsTable from "@/components/supplies/SupplyRecordsTable";
 import CreateSupplyRecordModal from "@/components/supplies/CreateSupplyRecordModal";
 import { Layers } from "lucide-react";
 
 async function getSupplyRecords() {
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseBrowserClient();
 
   const { data, error } = await supabase
     .from("supply_records")
@@ -27,7 +30,12 @@ async function getSupplyRecords() {
       updated_at,
       products (
         id,
-        product_name
+        product_name,
+        brand_id,
+        brands (
+          id,
+          brand_name
+        )
       ),
       supplier_assessment (
         id,
@@ -46,7 +54,7 @@ async function getSupplyRecords() {
 }
 
 async function getProducts() {
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseBrowserClient();
 
   const { data, error } = await supabase
     .from("products")
@@ -62,7 +70,7 @@ async function getProducts() {
 }
 
 async function getSuppliers() {
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseBrowserClient();
 
   const { data, error } = await supabase
     .from("supplier_assessment")
@@ -77,12 +85,46 @@ async function getSuppliers() {
   return data || [];
 }
 
-export default async function SuppliesPage() {
-  const [records, products, suppliers] = await Promise.all([
-    getSupplyRecords(),
-    getProducts(),
-    getSuppliers(),
-  ]);
+export default function SuppliesPage() {
+  const [records, setRecords] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [suppliers, setSuppliers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const [recordsData, productsData, suppliersData] = await Promise.all([
+        getSupplyRecords(),
+        getProducts(),
+        getSuppliers(),
+      ]);
+      setRecords(recordsData);
+      setProducts(productsData);
+      setSuppliers(suppliersData);
+    } catch (error) {
+      console.error("加载数据失败:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const handleSuccess = async () => {
+    // 强制清除可能的缓存
+    const supabase = createSupabaseBrowserClient();
+    await supabase
+      .from("supply_records")
+      .select("count", { count: "exact", head: true });
+
+    // 添加小延迟确保数据保存完成
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    await loadData();
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -91,7 +133,7 @@ export default async function SuppliesPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <a
             href="/"
-            className="text-blue-600 hover:text-blue-800 hover:underline text-sm"
+            className="text-blue-600 hover:text-blue-800 hover:underline hover:pointer text-sm"
           >
             ← 返回首页
           </a>
@@ -116,6 +158,7 @@ export default async function SuppliesPage() {
             <CreateSupplyRecordModal
               products={products}
               suppliers={suppliers}
+              onSuccess={handleSuccess}
             />
           </div>
         </div>
@@ -123,13 +166,20 @@ export default async function SuppliesPage() {
 
       {/* 内容区域 */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div key={records.length} className="bg-white rounded-lg shadow p-6">
-          <SupplyRecordsTable
-            records={records as any}
-            products={products}
-            suppliers={suppliers}
-          />
-        </div>
+        {loading ? (
+          <div className="bg-white rounded-lg shadow p-6 text-center">
+            <div className="text-gray-500">加载中...</div>
+          </div>
+        ) : (
+          <div key={records.length} className="bg-white rounded-lg shadow p-6">
+            <SupplyRecordsTable
+              records={records as any}
+              products={products}
+              suppliers={suppliers}
+              onRefresh={loadData}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

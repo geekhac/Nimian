@@ -50,11 +50,14 @@ export default function SupplyRecordsTable({
 
     if (searchTerm) {
       result = result.filter((r) => {
-        const productName = (r.products as any)?.product_name || "";
+        const product = r.products as any;
+        const brand = product?.brands?.brand_name;
+        const productName = product?.product_name || "";
+        const displayName = brand ? `${brand} ${productName}` : productName;
         const supplierName =
           (r.supplier_assessment as any)?.supplier_name || "";
         return (
-          productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
           supplierName.toLowerCase().includes(searchTerm.toLowerCase())
         );
       });
@@ -62,6 +65,26 @@ export default function SupplyRecordsTable({
 
     return result;
   }, [records, searchTerm]);
+
+  // 按商品分组，显示每个商品的所有供应商
+  const groupedRecords = useMemo(() => {
+    const groups: { [key: string]: typeof records } = {};
+
+    filteredRecords.forEach((record) => {
+      const product = record.products as any;
+      const brand = product?.brands?.brand_name;
+      const productName = product?.product_name || "";
+      const displayName = brand ? `${brand} ${productName}` : productName;
+      const key = `${record.product_id}_${displayName}`;
+
+      if (!groups[key]) {
+        groups[key] = [];
+      }
+      groups[key].push(record);
+    });
+
+    return groups;
+  }, [filteredRecords]);
 
   if (records.length === 0) {
     return (
@@ -82,11 +105,11 @@ export default function SupplyRecordsTable({
           placeholder="搜索商品名称或供应商..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
         />
       </div>
 
-      {/* 供应链列表 - 表格形式 */}
+      {/* 供应链列表 - 分组显示 */}
       <div className="overflow-x-auto">
         <table className="w-full border-collapse">
           <thead>
@@ -101,7 +124,7 @@ export default function SupplyRecordsTable({
                 价格
               </th>
               <th className="px-4 py-3 text-center text-sm font-semibold text-gray-900">
-                MOQ
+                最小订购量
               </th>
               <th className="px-4 py-3 text-center text-sm font-semibold text-gray-900">
                 交付天数
@@ -110,7 +133,7 @@ export default function SupplyRecordsTable({
                 授权
               </th>
               <th className="px-4 py-3 text-center text-sm font-semibold text-gray-900">
-                认证
+                资质证书
               </th>
               <th className="px-4 py-3 text-center text-sm font-semibold text-gray-900">
                 状态
@@ -121,98 +144,140 @@ export default function SupplyRecordsTable({
             </tr>
           </thead>
           <tbody>
-            {filteredRecords.map((record) => {
-              const productName =
-                (record.products as any)?.product_name || "未知";
-              const supplierName =
-                (record.supplier_assessment as any)?.supplier_name || "未知";
+            {Object.entries(groupedRecords).map(
+              ([productKey, productRecords]) => {
+                const product = productRecords[0].products as any;
+                const brand = product?.brands?.brand_name;
+                const productName = product?.product_name || "未知";
+                const displayName = brand
+                  ? `${brand} ${productName}`
+                  : productName;
+                const supplierCount = productRecords.length;
 
-              return (
-                <tr
-                  key={record.id}
-                  className="border-b border-gray-200 hover:bg-gray-50"
-                >
-                  <td className="px-4 py-3 text-sm text-gray-900">
-                    {productName}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-900">
-                    {supplierName}
-                  </td>
-                  <td className="px-4 py-3 text-sm">
-                    {record.price_tiers && record.price_tiers.length > 0 ? (
-                      <div className="space-y-1">
-                        {record.price_tiers.map((tier, idx) => (
-                          <div key={idx} className="text-xs text-gray-600">
-                            {tier.min_qty}-
-                            {tier.max_qty ? `${tier.max_qty}` : "∞"} 件:{" "}
-                            <span className="font-semibold text-blue-600">
-                              ¥{tier.price.toFixed(2)}
+                return productRecords.map((record, idx) => (
+                  <tr
+                    key={record.id}
+                    className="border-b border-gray-200 hover:bg-gray-50"
+                  >
+                    <td className="px-4 py-3 text-sm text-gray-900">
+                      {idx === 0 && (
+                        <div className="flex items-center gap-2">
+                          <span>{displayName}</span>
+                          {supplierCount > 1 && (
+                            <span className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded">
+                              {supplierCount}个供应商
                             </span>
-                          </div>
-                        ))}
+                          )}
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-900">
+                      {(record.supplier_assessment as any)?.supplier_name ||
+                        "未知"}
+                    </td>
+                    <td className="px-4 py-3 text-sm">
+                      {(() => {
+                        // Debug: log the price data
+                        console.log("Record price data:", {
+                          id: record.id,
+                          price: record.price,
+                          price_tiers: record.price_tiers,
+                          tiers_length: record.price_tiers?.length,
+                          is_array: Array.isArray(record.price_tiers),
+                        });
+
+                        // Check if there are valid price tiers (price > 0)
+                        const validPriceTiers =
+                          record.price_tiers &&
+                          Array.isArray(record.price_tiers)
+                            ? record.price_tiers.filter(
+                                (tier: any) => tier.price > 0,
+                              )
+                            : [];
+
+                        if (validPriceTiers.length > 0) {
+                          return (
+                            <div className="space-y-1">
+                              {validPriceTiers.map((tier: any, idx: number) => (
+                                <div
+                                  key={idx}
+                                  className="text-xs text-gray-600"
+                                >
+                                  {tier.min_qty}-
+                                  {tier.max_qty ? `${tier.max_qty}` : "∞"} 件:{" "}
+                                  <span className="font-semibold text-blue-600">
+                                    ¥{Number(tier.price).toFixed(2)}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          );
+                        } else {
+                          return (
+                            <span className="font-semibold text-blue-600">
+                              ¥{record.price.toFixed(2)}
+                            </span>
+                          );
+                        }
+                      })()}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-center text-gray-600">
+                      {record.moq}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-center text-gray-600">
+                      {record.delivery_days || "-"}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-center">
+                      {record.has_authorization ? (
+                        <span className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded">
+                          有
+                        </span>
+                      ) : (
+                        <span className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded">
+                          无
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-center">
+                      {record.has_certification ? (
+                        <span className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded">
+                          有
+                        </span>
+                      ) : (
+                        <span className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded">
+                          无
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-center">
+                      {record.is_active ? (
+                        <span className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded">
+                          启用
+                        </span>
+                      ) : (
+                        <span className="px-2 py-1 text-xs bg-red-100 text-red-700 rounded">
+                          停用
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-center">
+                      <div className="flex gap-2 justify-center">
+                        <EditSupplyRecordModal
+                          record={record}
+                          products={products}
+                          suppliers={suppliers}
+                          onSuccess={onRefresh}
+                        />
+                        <DeleteSupplyRecordModal
+                          record={record}
+                          onSuccess={onRefresh}
+                        />
                       </div>
-                    ) : (
-                      <span className="font-semibold text-blue-600">
-                        ¥{record.price.toFixed(2)}
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-center text-gray-600">
-                    {record.moq}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-center text-gray-600">
-                    {record.delivery_days || "-"}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-center">
-                    {record.has_authorization ? (
-                      <span className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded">
-                        有
-                      </span>
-                    ) : (
-                      <span className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">
-                        无
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-center">
-                    {record.has_certification ? (
-                      <span className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded">
-                        有
-                      </span>
-                    ) : (
-                      <span className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">
-                        无
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-center">
-                    {record.is_active ? (
-                      <span className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded">
-                        启用
-                      </span>
-                    ) : (
-                      <span className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">
-                        禁用
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-center">
-                    <div className="flex gap-2 justify-center">
-                      <EditSupplyRecordModal
-                        record={record}
-                        products={products}
-                        suppliers={suppliers}
-                        onSuccess={onRefresh}
-                      />
-                      <DeleteSupplyRecordModal
-                        record={record}
-                        onSuccess={onRefresh}
-                      />
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
+                    </td>
+                  </tr>
+                ));
+              },
+            )}
           </tbody>
         </table>
       </div>
