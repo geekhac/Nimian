@@ -21,7 +21,7 @@ export default function EditProductModal({
     <div>
       <button
         onClick={() => setOpen(true)}
-        className="px-3 py-1 rounded bg-gray-100 hover:bg-gray-200"
+        className="px-3 py-1 rounded bg-blue-600 text-white hover:bg-blue-700"
       >
         编辑
       </button>
@@ -30,8 +30,13 @@ export default function EditProductModal({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="bg-white rounded shadow max-w-lg w-full p-6">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium">编辑商品</h3>
-              <button onClick={() => setOpen(false)}>关闭</button>
+              <h3 className="text-lg font-medium text-gray-800">编辑商品</h3>
+              <button
+                onClick={() => setOpen(false)}
+                className="px-2 py-1 text-sm text-gray-700 hover:text-gray-900"
+              >
+                关闭
+              </button>
             </div>
 
             <ProductForm

@@ -86,8 +86,8 @@ export default function ProductList({
         </div>
       </div>
 
-      {/* 商品网格 */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* 商品网格 - 一页100个，5列显示 */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         {validProducts.map((product) => (
           <ProductCard
             key={product.id}

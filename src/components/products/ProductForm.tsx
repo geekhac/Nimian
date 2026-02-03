@@ -24,6 +24,11 @@ export default function ProductForm({
   const [brandId, setBrandId] = useState<string>(
     initial.brand_id || brands[0]?.id || "",
   );
+  const initialBrandName =
+    brands.find((b) => b.id === initial.brand_id)?.brand_name ||
+    brands[0]?.brand_name ||
+    "";
+  const [brandName, setBrandName] = useState<string>(initialBrandName);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -46,7 +51,37 @@ export default function ProductForm({
         body: JSON.stringify(payload),
       });
 
-      if (!res.ok) throw new Error("请求失败");
+      // 尝试解析服务器返回的内容以便显示更精确的错误信息
+      let bodyText = "";
+      try {
+        bodyText = await res.text();
+      } catch (e) {
+        console.error("读取响应体失败", e);
+      }
+
+      let parsed: any = null;
+      try {
+        parsed = bodyText ? JSON.parse(bodyText) : null;
+      } catch (e) {
+        // 非 JSON 响应，保留原始文本
+        parsed = null;
+      }
+
+      if (!res.ok) {
+        const serverMessage =
+          parsed?.message ||
+          parsed?.error ||
+          bodyText ||
+          `请求失败 (status=${res.status})`;
+        console.error("提交商品失败:", {
+          status: res.status,
+          serverMessage,
+          parsed,
+        });
+        alert(`操作失败：${serverMessage}`);
+        throw new Error(serverMessage);
+      }
+
       if (onSuccess) onSuccess();
       router.refresh();
     } catch (err) {
@@ -65,7 +100,7 @@ export default function ProductForm({
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
-          className="mt-1 block w-full rounded-md border-gray-200"
+          className="mt-1 block w-full rounded-md border-gray-200 text-gray-800 placeholder-gray-400"
         />
       </div>
 
@@ -74,7 +109,7 @@ export default function ProductForm({
         <input
           value={spec}
           onChange={(e) => setSpec(e.target.value)}
-          className="mt-1 block w-full rounded-md border-gray-200"
+          className="mt-1 block w-full rounded-md border-gray-200 text-gray-800 placeholder-gray-400"
         />
       </div>
 
@@ -83,24 +118,30 @@ export default function ProductForm({
         <textarea
           value={desc}
           onChange={(e) => setDesc(e.target.value)}
-          className="mt-1 block w-full rounded-md border-gray-200"
+          className="mt-1 block w-full rounded-md border-gray-200 text-gray-800 placeholder-gray-400"
         />
       </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700">品牌</label>
-        <select
-          value={brandId}
-          onChange={(e) => setBrandId(e.target.value)}
-          className="mt-1 block w-full rounded-md border-gray-200"
-        >
+        <input
+          list="brands-list"
+          value={brandName}
+          onChange={(e) => {
+            const val = e.target.value;
+            setBrandName(val);
+            const matched = brands.find((b) => b.brand_name === val);
+            setBrandId(matched ? matched.id : "");
+          }}
+          placeholder="输入品牌名称可快速筛选"
+          className="mt-1 block w-full rounded-md border-gray-200 text-gray-800 placeholder-gray-400"
+        />
+        <datalist id="brands-list">
           <option value="">无</option>
           {brands.map((b) => (
-            <option key={b.id} value={b.id}>
-              {b.brand_name}
-            </option>
+            <option key={b.id} value={b.brand_name} />
           ))}
-        </select>
+        </datalist>
       </div>
 
       <div className="flex justify-end">

@@ -2,6 +2,7 @@
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 interface PaginationProps {
   currentPage: number;
@@ -15,11 +16,20 @@ export default function Pagination({
   searchParams,
 }: PaginationProps) {
   const router = useRouter();
+  const [jumpPage, setJumpPage] = useState("");
 
   const navigateToPage = (page: number) => {
     const params = new URLSearchParams(searchParams as Record<string, string>);
     params.set("page", page.toString());
     router.push(`/products?${params.toString()}`);
+  };
+
+  const handleJump = () => {
+    const page = parseInt(jumpPage, 10);
+    if (!isNaN(page) && page >= 1 && page <= totalPages) {
+      navigateToPage(page);
+      setJumpPage("");
+    }
   };
 
   if (totalPages <= 1) return null;
@@ -49,7 +59,30 @@ export default function Pagination({
             <span className="font-medium">{totalPages}</span>
           </p>
         </div>
-        <div>
+        <div className="flex items-center gap-4">
+          {/* 页码跳转输入框 */}
+          <div className="flex items-center gap-2">
+            <input
+              type="number"
+              min="1"
+              max={totalPages}
+              value={jumpPage}
+              onChange={(e) => setJumpPage(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleJump();
+              }}
+              placeholder="跳转页码"
+              className="w-20 px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-400"
+            />
+            <button
+              onClick={handleJump}
+              className="px-3 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+            >
+              跳转
+            </button>
+          </div>
+
+          {/* 分页导航 */}
           <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm">
             <button
               onClick={() => navigateToPage(currentPage - 1)}

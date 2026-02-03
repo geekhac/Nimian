@@ -164,7 +164,7 @@ export default async function ProductPage({ params }: { params: any }) {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium mb-4">详情</h3>
+          <h3 className="text-lg font-medium mb-4 text-gray-700">详情</h3>
           <div className="grid grid-cols-1 gap-4">
             <div>
               <div className="text-sm text-gray-500">规格</div>

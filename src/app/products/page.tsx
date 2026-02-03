@@ -64,7 +64,7 @@ async function getProducts(searchParams: Promise<SearchParams> | SearchParams) {
   const pageSizeParam = params?.pageSize;
   const pageSize = Array.isArray(pageSizeParam)
     ? Number(pageSizeParam[0])
-    : Number(pageSizeParam) || 24;
+    : Number(pageSizeParam) || 100;
 
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
@@ -106,12 +106,37 @@ async function getProducts(searchParams: Promise<SearchParams> | SearchParams) {
 // 获取所有品牌
 async function getBrands() {
   const supabase = await createSupabaseServerClient();
+  // 拉取品牌和其关联的商品 id 列表，用于在服务端计算每个品牌的商品数量
   const { data } = await supabase
     .from("brands")
-    .select("id, brand_name")
-    .order("brand_name");
+    .select("id, brand_name, registered_location, products(id)");
 
-  return data || [];
+  const brandsWithCount = (data || []).map((b: any) => {
+    const productCount = Array.isArray(b.products) ? b.products.length : 0;
+    const registeredLocation: string | null = b.registered_location;
+
+    // 判定是否为进口：当 registered_location 不包含 中国/China 时视为进口
+    const isImported =
+      !!registeredLocation && !/中国|china/i.test(registeredLocation);
+
+    return {
+      id: b.id,
+      brand_name: b.brand_name,
+      registered_location: registeredLocation,
+      productCount,
+      isImported,
+    };
+  });
+
+  // 先把进口品牌放在前面，同组内按商品数量降序；如果商品数量相同再按名称升序
+  brandsWithCount.sort((a: any, b: any) => {
+    if (a.isImported !== b.isImported) return a.isImported ? -1 : 1;
+    if (b.productCount !== a.productCount)
+      return b.productCount - a.productCount;
+    return (a.brand_name || "").localeCompare(b.brand_name || "");
+  });
+
+  return brandsWithCount;
 }
 
 // 获取商品总数
@@ -210,8 +235,8 @@ export default async function ProductsPage({
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* 左侧筛选栏 */}
-          <div className="lg:w-1/4">
+          {/* 左侧筛选栏 - 缩窄 */}
+          <div className="lg:w-48">
             <div className="sticky top-8">
               <ProductFilters
                 brands={brands}
@@ -222,7 +247,7 @@ export default async function ProductsPage({
           </div>
 
           {/* 右侧内容区 */}
-          <div className="lg:w-3/4">
+          <div className="flex-1">
             {/* 排序和分页信息 - 简化结构 */}
             <div className="bg-white rounded-lg shadow p-4 mb-6">
               <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
