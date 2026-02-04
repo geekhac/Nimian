@@ -5,6 +5,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 import SupplyRecordsTable from "@/components/supplies/SupplyRecordsTable";
 import CreateSupplyRecordModal from "@/components/supplies/CreateSupplyRecordModal";
 import { Layers } from "lucide-react";
+import Navigation from "@/components/shared/Navigation";
 
 async function getSupplyRecords() {
   const supabase = createSupabaseBrowserClient();
@@ -130,17 +131,8 @@ export default function SuppliesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* 导航面包屑 */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          <a
-            href="/"
-            className="text-blue-600 hover:text-blue-800 hover:underline hover:pointer text-sm"
-          >
-            ← 返回首页
-          </a>
-        </div>
-      </div>
+      {/* 导航栏 */}
+      <Navigation />
 
       {/* 头部 */}
       <div className="bg-white shadow">

@@ -18,6 +18,22 @@ interface ProductListProps {
     brands: {
       brand_name: string;
     };
+    supply_records?: Array<{
+      id: string;
+      supplier_id: number;
+      supplier: {
+        id: number;
+        supplier_name: string;
+      };
+      price: number;
+      moq: number;
+      price_tiers: Array<{
+        min_qty: number;
+        max_qty: number | null;
+        price: number;
+      }> | null;
+      is_active: boolean;
+    }>;
   }>;
   currentPage: number;
   totalPages: number;
@@ -133,14 +149,14 @@ export default function ProductList({
       {deleting && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="bg-white rounded shadow max-w-md w-full p-6">
-            <h3 className="text-lg font-medium mb-4">确认删除</h3>
+            <h3 className="text-lg font-medium mb-4 text-gray-800">确认删除</h3>
             <p className="text-sm text-gray-600 mb-4">
               确定要删除「{deleting.product_name}」吗？此操作不可恢复。
             </p>
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setDeleting(null)}
-                className="px-3 py-1 rounded border hover:pointer hover:bg-gray-50"
+                className="px-4 py-2 rounded border border-gray-300 text-gray-500 hover:bg-gray-50 hover:pointer transition-colors"
               >
                 取消
               </button>
@@ -158,7 +174,7 @@ export default function ProductList({
                     alert("删除失败，请查看控制台");
                   }
                 }}
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 hover:pointer"
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 hover:pointer transition-colors"
               >
                 删除
               </button>

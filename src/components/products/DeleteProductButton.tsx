@@ -42,21 +42,21 @@ export default function DeleteProductButton({ productId, productName }: Props) {
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="bg-white rounded shadow max-w-md w-full p-6">
-            <h3 className="text-lg font-medium mb-4">确认删除</h3>
+            <h3 className="text-lg font-medium mb-4 text-gray-800">确认删除</h3>
             <p className="text-sm text-gray-600 mb-4">
               确定要删除「{productName}」吗？此操作不可恢复。
             </p>
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setOpen(false)}
-                className="px-3 py-1 rounded border hover:pointer hover:bg-gray-50"
+                className="px-4 py-2 rounded border border-gray-300 text-gray-500 hover:bg-gray-50 hover:pointer transition-colors"
               >
                 取消
               </button>
               <button
                 onClick={handleDelete}
                 disabled={loading}
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 hover:pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 hover:pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? "删除中..." : "删除"}
               </button>
