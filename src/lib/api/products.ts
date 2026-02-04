@@ -19,13 +19,7 @@ export interface ProductsResponse {
 }
 
 export class ProductAPI {
-  private supabase: ReturnType<typeof createSupabaseServerClient>;
-
-  constructor() {
-    this.supabase = createSupabaseServerClient();
-  }
-
-  async getProducts(params: GetProductsParams): Promise<ProductsResponse> {
+  static async getProducts(params: GetProductsParams): Promise<ProductsResponse> {
     const { 
       page = 1, 
       page_size = 12, 
@@ -35,8 +29,10 @@ export class ProductAPI {
       sort_order = 'desc' 
     } = params;
 
+    const supabase = await createSupabaseServerClient();
+
     try {
-      let query = this.supabase
+      let query = supabase
         .from('products')
         .select(`
           *,
@@ -56,12 +52,12 @@ export class ProductAPI {
       // 搜索过滤 - 优化品牌搜索
       if (search) {
         // 先搜索品牌ID
-        const { data: brandMatches } = await this.supabase
+        const { data: brandMatches } = await supabase
           .from('brands')
           .select('id')
           .ilike('brand_name', `%${search}%`);
 
-        const brandIds = brandMatches?.map(b => b.id) || [];
+        const brandIds = brandMatches?.map((b: { id: string }) => b.id) || [];
         
         // 构建搜索条件
         const searchConditions = [`product_name.ilike.%${search}%`];
@@ -107,9 +103,11 @@ export class ProductAPI {
     }
   }
 
-  async getBrands(): Promise<Array<{ id: string; brand_name: string }>> {
+  static async getBrands(): Promise<Array<{ id: string; brand_name: string }>> {
+    const supabase = await createSupabaseServerClient();
+    
     try {
-      const { data, error } = await this.supabase
+      const { data, error } = await supabase
         .from('brands')
         .select('id, brand_name')
         .order('brand_name');
@@ -126,9 +124,11 @@ export class ProductAPI {
     }
   }
 
-  async deleteProduct(id: string): Promise<void> {
+  static async deleteProduct(id: string): Promise<void> {
+    const supabase = await createSupabaseServerClient();
+    
     try {
-      const { error } = await this.supabase
+      const { error } = await supabase
         .from('products')
         .delete()
         .eq('id', id);
@@ -143,9 +143,11 @@ export class ProductAPI {
     }
   }
 
-  async createProduct(product: Omit<Product, 'id' | 'created_at' | 'updated_at' | 'brands' | 'supply_records'>): Promise<Product> {
+  static async createProduct(product: Omit<Product, 'id' | 'created_at' | 'updated_at' | 'brands' | 'supply_records'>): Promise<Product> {
+    const supabase = await createSupabaseServerClient();
+    
     try {
-      const { data, error } = await this.supabase
+      const { data, error } = await supabase
         .from('products')
         .insert(product)
         .select(`
@@ -176,9 +178,11 @@ export class ProductAPI {
     }
   }
 
-  async updateProduct(id: string, updates: Partial<Product>): Promise<Product> {
+  static async updateProduct(id: string, updates: Partial<Product>): Promise<Product> {
+    const supabase = await createSupabaseServerClient();
+    
     try {
-      const { data, error } = await this.supabase
+      const { data, error } = await supabase
         .from('products')
         .update(updates)
         .eq('id', id)
@@ -210,6 +214,3 @@ export class ProductAPI {
     }
   }
 }
-
-// 单例实例
-export const productAPI = new ProductAPI();

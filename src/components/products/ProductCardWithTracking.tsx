@@ -157,7 +157,7 @@ export default function ProductCardWithTracking({
   const brandName = product.brands?.brand_name || "未分类";
   const fullProductName = `${brandName} ${product.product_name}${product.specification ? ` ${product.specification}` : ""}`;
   const minPrice =
-    product.supply_records?.length > 0
+    product.supply_records && product.supply_records.length > 0
       ? Math.min(...product.supply_records.map((r) => r.price))
       : null;
 
