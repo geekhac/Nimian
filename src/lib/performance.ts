@@ -187,6 +187,27 @@ export class PerformanceMonitor {
       console.warn('⚠️ High error rate detected:', errorRate);
     }
   }
+
+  // API 调用包装器
+  static withPerformanceTracking<T extends any[], R>(
+    fn: (...args: T) => Promise<R>,
+    endpoint: string
+  ) {
+    return async (...args: T): Promise<R> => {
+      const startTime = Date.now();
+      try {
+        const result = await fn(...args);
+        const duration = Date.now() - startTime;
+        PerformanceMonitor.trackAPICall(endpoint, duration, true);
+        return result;
+      } catch (error) {
+        const duration = Date.now() - startTime;
+        PerformanceMonitor.trackAPICall(endpoint, duration, false);
+        PerformanceMonitor.trackError(error as Error, { endpoint });
+        throw error;
+      }
+    };
+  }
 }
 
 // React Hook 用于自动追踪页面性能
@@ -206,25 +227,4 @@ export function usePerformanceTracking(page: string) {
       PerformanceMonitor.checkPerformanceThresholds();
     };
   }, [page]);
-}
-
-// API 调用包装器
-export function withPerformanceTracking<T extends any[], R>(
-  fn: (...args: T) => Promise<R>,
-  endpoint: string
-) {
-  return async (...args: T): Promise<R> => {
-    const startTime = Date.now();
-    try {
-      const result = await fn(...args);
-      const duration = Date.now() - startTime;
-      PerformanceMonitor.trackAPICall(endpoint, duration, true);
-      return result;
-    } catch (error) {
-      const duration = Date.now() - startTime;
-      PerformanceMonitor.trackAPICall(endpoint, duration, false);
-      PerformanceMonitor.trackError(error as Error, { endpoint });
-      throw error;
-    }
-  };
 }
