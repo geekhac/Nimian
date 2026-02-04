@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import ProductCard from "@/components/products/ProductCard";
 import Pagination from "../shared/Pagination";
 import CreateProductModal from "./CreateProductModal";
@@ -48,8 +49,10 @@ export default function ProductList({
   searchParams,
   brands,
 }: ProductListProps) {
-  const [editing, setEditing] = useState<null | any>(null);
-  const [deleting, setDeleting] = useState<null | any>(null);
+  const router = useRouter();
+  const [editing, setEditing] = useState<any>(null);
+  const [deleting, setDeleting] = useState<any>(null);
+  const [creating, setCreating] = useState(false);
 
   const uuidRegex =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -139,7 +142,10 @@ export default function ProductList({
                 image_url: editing.image_url,
               }}
               productId={editing.id}
-              onSuccess={() => setEditing(null)}
+              onSuccess={() => {
+                setEditing(null);
+                router.refresh();
+              }}
             />
           </div>
         </div>
