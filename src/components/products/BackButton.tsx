@@ -17,6 +17,7 @@ export default function BackButton() {
         <button
           onClick={handleBack}
           className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:pointer transition-colors"
+          style={{ cursor: "pointer" }}
         >
           <ArrowLeft className="w-4 h-4" />
           返回上一页

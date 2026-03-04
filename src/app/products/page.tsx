@@ -4,7 +4,6 @@ import ProductList from "@/components/products/ProductList";
 import ProductFilters from "@/components/products/ProductFilters";
 import SearchBar from "@/components/products/SearchBar";
 import { SearchParams } from "@/types";
-import Navigation from "@/components/shared/Navigation";
 
 // 先定义正确的类型
 type ProductWithBrand = {
@@ -17,43 +16,12 @@ type ProductWithBrand = {
   brands: {
     brand_name: string;
   };
-  supply_records?: Array<{
-    id: string;
-    supplier_id: number;
-    supplier: {
-      id: number;
-      supplier_name: string;
-    };
-    price: number;
-    moq: number;
-    price_tiers: Array<{
-      min_qty: number;
-      max_qty: number | null;
-      price: number;
-    }> | null;
-    is_active: boolean;
-  }>;
 };
 
 // 获取商品数据（带筛选功能）
 async function getProducts(searchParams: Promise<SearchParams> | SearchParams) {
   const supabase = await createSupabaseServerClient();
   const params = await searchParams;
-
-  // 如果有品牌搜索，先获取匹配的品牌ID
-  let brandIds: string[] = [];
-  if (params?.search) {
-    const searchTerm = Array.isArray(params.search)
-      ? params.search[0]
-      : params.search;
-
-    const { data: matchingBrands } = await supabase
-      .from("brands")
-      .select("id")
-      .ilike("brand_name", `%${searchTerm}%`);
-
-    brandIds = matchingBrands?.map((brand) => brand.id) || [];
-  }
 
   let query = supabase.from("products").select(`
       id,
@@ -64,18 +32,6 @@ async function getProducts(searchParams: Promise<SearchParams> | SearchParams) {
       image_url,
       brands:brand_id (
         brand_name
-      ),
-      supply_records(
-        id,
-        supplier_id,
-        supplier:supplier_id (
-          id,
-          supplier_name
-        ),
-        price,
-        moq,
-        price_tiers,
-        is_active
       )
     `);
 
@@ -83,19 +39,9 @@ async function getProducts(searchParams: Promise<SearchParams> | SearchParams) {
     const searchTerm = Array.isArray(params.search)
       ? params.search[0]
       : params.search;
-
-    // 构建搜索条件
-    const searchConditions = [
-      `product_name.ilike.%${searchTerm}%`,
-      `description.ilike.%${searchTerm}%`,
-    ];
-
-    // 添加品牌ID条件
-    if (brandIds.length > 0) {
-      searchConditions.push(`brand_id.in.(${brandIds.join(",")})`);
-    }
-
-    query = query.or(searchConditions.join(","));
+    query = query.or(
+      `product_name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`,
+    );
   }
 
   if (params?.brand_id) {
@@ -135,23 +81,10 @@ async function getProducts(searchParams: Promise<SearchParams> | SearchParams) {
   }
 
   // 转换数据格式，兼容 Supabase 返回的 brands 为数组或对象
-  const products = (data || []).map((product: any) => {
+  const products = (data || []).map((product) => {
     const brandName = Array.isArray(product.brands)
       ? product.brands[0]?.brand_name
       : (product.brands as any)?.brand_name;
-
-    // 处理供应记录数据
-    const supplyRecords = (product.supply_records || []).map((record: any) => ({
-      id: record.id,
-      supplier_id: record.supplier_id,
-      supplier: Array.isArray(record.supplier)
-        ? record.supplier[0]
-        : record.supplier,
-      price: record.price,
-      moq: record.moq,
-      price_tiers: record.price_tiers,
-      is_active: record.is_active,
-    }));
 
     return {
       id: product.id,
@@ -163,7 +96,6 @@ async function getProducts(searchParams: Promise<SearchParams> | SearchParams) {
       brands: {
         brand_name: brandName || "未知品牌",
       },
-      supply_records: supplyRecords,
     };
   }) as ProductWithBrand[];
 
@@ -217,21 +149,6 @@ async function getProductsCount(
   const supabase = await createSupabaseServerClient();
   const params = await searchParams;
 
-  // 如果有品牌搜索，先获取匹配的品牌ID
-  let brandIds: string[] = [];
-  if (params?.search) {
-    const searchTerm = Array.isArray(params.search)
-      ? params.search[0]
-      : params.search;
-
-    const { data: matchingBrands } = await supabase
-      .from("brands")
-      .select("id")
-      .ilike("brand_name", `%${searchTerm}%`);
-
-    brandIds = matchingBrands?.map((brand) => brand.id) || [];
-  }
-
   let query = supabase
     .from("products")
     .select("*", { count: "exact", head: true });
@@ -240,19 +157,9 @@ async function getProductsCount(
     const searchTerm = Array.isArray(params.search)
       ? params.search[0]
       : params.search;
-
-    // 构建搜索条件
-    const searchConditions = [
-      `product_name.ilike.%${searchTerm}%`,
-      `description.ilike.%${searchTerm}%`,
-    ];
-
-    // 添加品牌ID条件
-    if (brandIds.length > 0) {
-      searchConditions.push(`brand_id.in.(${brandIds.join(",")})`);
-    }
-
-    query = query.or(searchConditions.join(","));
+    query = query.or(
+      `product_name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`,
+    );
   }
 
   if (params?.brand_id) {
@@ -300,8 +207,17 @@ export default async function ProductsPage({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* 导航栏 */}
-      <Navigation />
+      {/* 导航面包屑 */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+          <a
+            href="/"
+            className="text-blue-600 hover:text-blue-800 hover:underline hover:pointer text-sm"
+          >
+            ← 返回首页
+          </a>
+        </div>
+      </div>
       {/* 头部 */}
       <div className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

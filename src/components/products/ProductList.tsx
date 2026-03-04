@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import ProductCard from "@/components/products/ProductCard";
 import Pagination from "../shared/Pagination";
 import CreateProductModal from "./CreateProductModal";
@@ -19,22 +18,6 @@ interface ProductListProps {
     brands: {
       brand_name: string;
     };
-    supply_records?: Array<{
-      id: string;
-      supplier_id: number;
-      supplier: {
-        id: number;
-        supplier_name: string;
-      };
-      price: number;
-      moq: number;
-      price_tiers: Array<{
-        min_qty: number;
-        max_qty: number | null;
-        price: number;
-      }> | null;
-      is_active: boolean;
-    }>;
   }>;
   currentPage: number;
   totalPages: number;
@@ -49,10 +32,8 @@ export default function ProductList({
   searchParams,
   brands,
 }: ProductListProps) {
-  const router = useRouter();
-  const [editing, setEditing] = useState<any>(null);
-  const [deleting, setDeleting] = useState<any>(null);
-  const [creating, setCreating] = useState(false);
+  const [editing, setEditing] = useState<null | any>(null);
+  const [deleting, setDeleting] = useState<null | any>(null);
 
   const uuidRegex =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -142,10 +123,7 @@ export default function ProductList({
                 image_url: editing.image_url,
               }}
               productId={editing.id}
-              onSuccess={() => {
-                setEditing(null);
-                router.refresh();
-              }}
+              onSuccess={() => setEditing(null)}
             />
           </div>
         </div>
@@ -155,14 +133,14 @@ export default function ProductList({
       {deleting && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="bg-white rounded shadow max-w-md w-full p-6">
-            <h3 className="text-lg font-medium mb-4 text-gray-800">确认删除</h3>
+            <h3 className="text-lg font-medium mb-4">确认删除</h3>
             <p className="text-sm text-gray-600 mb-4">
               确定要删除「{deleting.product_name}」吗？此操作不可恢复。
             </p>
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setDeleting(null)}
-                className="px-4 py-2 rounded border border-gray-300 text-gray-500 hover:bg-gray-50 hover:pointer transition-colors"
+                className="px-3 py-1 rounded border hover:pointer hover:bg-gray-50"
               >
                 取消
               </button>
@@ -180,7 +158,7 @@ export default function ProductList({
                     alert("删除失败，请查看控制台");
                   }
                 }}
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 hover:pointer transition-colors"
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 hover:pointer"
               >
                 删除
               </button>

@@ -99,35 +99,35 @@ export default function ProductForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-900">名称</label>
+        <label className="block text-sm font-medium text-gray-700">名称</label>
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
-          className="mt-1 block w-full rounded-md border-gray-200 text-gray-900 placeholder-gray-500"
+          className="mt-1 block w-full rounded-md border-gray-200 text-gray-800 placeholder-gray-400"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-900">规格</label>
+        <label className="block text-sm font-medium text-gray-700">规格</label>
         <input
           value={spec}
           onChange={(e) => setSpec(e.target.value)}
-          className="mt-1 block w-full rounded-md border-gray-200 text-gray-900 placeholder-gray-500"
+          className="mt-1 block w-full rounded-md border-gray-200 text-gray-800 placeholder-gray-400"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-900">描述</label>
+        <label className="block text-sm font-medium text-gray-700">描述</label>
         <textarea
           value={desc}
           onChange={(e) => setDesc(e.target.value)}
-          className="mt-1 block w-full rounded-md border-gray-200 text-gray-900 placeholder-gray-500"
+          className="mt-1 block w-full rounded-md border-gray-200 text-gray-800 placeholder-gray-400"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-900">品牌</label>
+        <label className="block text-sm font-medium text-gray-700">品牌</label>
         <input
           list="brands-list"
           value={brandName}
@@ -138,7 +138,7 @@ export default function ProductForm({
             setBrandId(matched ? matched.id : "");
           }}
           placeholder="输入品牌名称可快速筛选"
-          className="mt-1 block w-full rounded-md border-gray-200 text-gray-900 placeholder-gray-500"
+          className="mt-1 block w-full rounded-md border-gray-200 text-gray-800 placeholder-gray-400"
         />
         <datalist id="brands-list">
           <option value="">无</option>
@@ -147,14 +147,14 @@ export default function ProductForm({
           ))}
         </datalist>
         <div className="mt-3">
-          <label className="block text-sm font-medium text-gray-900">
+          <label className="block text-sm font-medium text-gray-700">
             图片链接
           </label>
           <input
             value={imageUrl}
             onChange={(e) => setImageUrl(e.target.value)}
             placeholder="https://..."
-            className="mt-1 block w-full rounded-md border-gray-200 text-gray-900 placeholder-gray-500"
+            className="mt-1 block w-full rounded-md border-gray-200 text-gray-800 placeholder-gray-400"
           />
         </div>
       </div>

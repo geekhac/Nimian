@@ -16,6 +16,7 @@ export default function CreateProductModal({ brands }: Props) {
       <button
         onClick={() => setOpen(true)}
         className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 hover:pointer"
+        style={{ cursor: "pointer" }}
       >
         新建商品
       </button>
@@ -28,6 +29,7 @@ export default function CreateProductModal({ brands }: Props) {
               <button
                 onClick={() => setOpen(false)}
                 className="px-3 py-1 text-sm text-black hover:bg-gray-100 hover:pointer font-semibold rounded"
+                style={{ cursor: "pointer" }}
               >
                 关闭
               </button>
